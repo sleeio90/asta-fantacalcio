@@ -1,0 +1,58 @@
+.auction-joiner-card {
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.form-row {
+  margin-bottom: 16px;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.info-section {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px;
+  background-color: #f5f5f5;
+  border-radius: 8px;
+  margin-top: 16px;
+}
+
+.info-icon {
+  color: #2196f3;
+  margin-top: 2px;
+}
+
+.info-text {
+  margin: 0;
+  color: #666;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+mat-card-header {
+  margin-bottom: 24px;
+}
+
+mat-card-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+mat-card-actions {
+  padding: 16px 24px 24px;
+}
+
+button[mat-raised-button] {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+input[style*="text-transform: uppercase"] {
+  text-transform: uppercase !important;
+}

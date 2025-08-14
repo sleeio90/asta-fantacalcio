@@ -1,0 +1,90 @@
+/* You can add global styles to this file, and also import other style files */
+@import "~@angular/material/prebuilt-themes/indigo-pink.css";
+@import "~bootstrap/dist/css/bootstrap.min.css";
+
+html, body { 
+  height: 100%; 
+  margin: 0; 
+  font-family: Roboto, "Helvetica Neue", sans-serif; 
+}
+
+.success-snackbar {
+  background: #4caf50;
+  color: white;
+}
+
+.error-snackbar {
+  background: #f44336;
+  color: white;
+}
+
+.warning-snackbar {
+  background: #ff9800;
+  color: white;
+}
+
+.info-snackbar {
+  background: #2196f3;
+  color: white;
+}
+
+.mat-column-actions {
+  width: 120px;
+  text-align: center;
+}
+
+.mat-row:hover {
+  background-color: rgba(0, 0, 0, 0.04);
+}
+
+.mat-card {
+  margin-bottom: 20px;
+}
+
+.mat-card-header {
+  margin-bottom: 10px;
+}
+
+.filter-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.search-field {
+  width: 100%;
+  max-width: 400px;
+}
+
+.ruolo-portiere {
+  color: #2196f3;
+  font-weight: bold;
+}
+
+.ruolo-difensore {
+  color: #4caf50;
+  font-weight: bold;
+}
+
+.ruolo-centrocampista {
+  color: #ff9800;
+  font-weight: bold;
+}
+
+.ruolo-attaccante {
+  color: #f44336;
+  font-weight: bold;
+}
+
+.budget-warning {
+  color: #ff9800;
+}
+
+.budget-danger {
+  color: #f44336;
+}
+
+.budget-ok {
+  color: #4caf50;
+}

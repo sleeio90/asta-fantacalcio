@@ -1,0 +1,220 @@
+.header-with-back {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+}
+
+.back-button {
+  flex-shrink: 0;
+}
+
+.team-header h3, .team-header h4 {
+  margin-bottom: 15px;
+}
+
+.ruoli-header h4 {
+  padding: 5px;
+  border-radius: 4px;
+  text-align: center;
+  font-weight: normal;
+  font-size: 0.95rem;
+  letter-spacing: 0.5px;
+}
+
+.ruolo-portiere {
+  background-color: rgba(255, 235, 59, 0.7);
+  color: #333;
+  
+  .calciatori-list {
+    color: #333;
+  }
+}
+
+.ruolo-difensore {
+  background-color: rgba(76, 175, 80, 0.7);
+  color: white;
+  
+  .calciatori-list {
+    color: #333;
+  }
+}
+
+.ruolo-centrocampista {
+  background-color: rgba(33, 150, 243, 0.7);
+  color: white;
+  
+  .calciatori-list {
+    color: #333;
+  }
+}
+
+.ruolo-attaccante {
+  background-color: rgba(244, 67, 54, 0.7);
+  color: white;
+  
+  .calciatori-list {
+    color: #333;
+  }
+}
+
+.team-row {
+  border-bottom: 1px solid #eee;
+  padding-bottom: 15px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.team-row:hover {
+  background-color: rgba(0, 0, 0, 0.04);
+}
+
+.team-row:last-child {
+  border-bottom: none;
+}
+
+.team-info h5 {
+  margin-bottom: 5px;
+  color: #3f51b5;
+  font-weight: normal;
+}
+
+.ruolo-container {
+  border-left: 1px solid #eee;
+  padding-left: 15px;
+  height: 320px;
+  background-color: white;
+}
+
+/* Stile per assicurare che il testo nelle sezioni ruolo sia della corretta dimensione */
+.ruolo-container .calciatori-list {
+  font-size: 0.85rem;
+  font-weight: normal;
+  line-height: 1.2;
+}
+
+.ruolo-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.ruolo-count {
+  font-weight: normal;
+  padding: 2px 6px;
+  display: inline-block;
+  border-radius: 2px;
+  background-color: #f5f5f5;
+  min-width: 2em;
+  text-align: center;
+  font-size: 0.85rem;
+}
+
+.ruolo-portiere .ruolo-count {
+  background-color: rgba(255, 235, 59, 0.3);
+  color: #333;
+}
+
+.ruolo-difensore .ruolo-count {
+  background-color: rgba(76, 175, 80, 0.3);
+  color: #333;
+}
+
+.ruolo-centrocampista .ruolo-count {
+  background-color: rgba(33, 150, 243, 0.3);
+  color: #333;
+}
+
+.ruolo-attaccante .ruolo-count {
+  background-color: rgba(244, 67, 54, 0.3);
+  color: #333;
+}
+
+.ruolo-totale {
+  font-weight: normal;
+  color: #555;
+  font-size: 0.9rem;
+}
+
+.calciatori-list {
+  overflow: visible;
+}
+
+.ruolo-difensore, .ruolo-centrocampista, .ruolo-attaccante {
+  .calciatore-nome, .calciatore-squadra, .calciatore-prezzo {
+    color: #333 !important;
+  }
+}
+
+.calciatore-single-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 3px 6px;
+  margin-bottom: 2px;
+  background-color: white;
+  border-radius: 3px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  border-bottom: 1px solid #eee;
+  color: #333;
+}
+
+.calciatore-nome {
+  font-weight: normal;
+  font-size: 0.85rem;
+  flex: 2;
+  display: flex;
+  align-items: center;
+}
+
+.ruolo-pallino {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  line-height: 18px;
+  text-align: center;
+  border-radius: 50%;
+  margin-right: 6px;
+  font-weight: normal;
+  font-size: 0.75rem;
+  color: #333;
+}
+
+.ruolo-portiere .ruolo-pallino {
+  background-color: rgba(255, 235, 59, 0.8);
+}
+
+.ruolo-difensore .ruolo-pallino {
+  background-color: rgba(76, 175, 80, 0.8);
+}
+
+.ruolo-centrocampista .ruolo-pallino {
+  background-color: rgba(33, 150, 243, 0.8);
+}
+
+.ruolo-attaccante .ruolo-pallino {
+  background-color: rgba(244, 67, 54, 0.8);
+}
+
+.calciatore-squadra {
+  font-size: 0.8rem;
+  color: #666;
+  flex: 1;
+  text-align: center;
+}
+
+.calciatore-prezzo {
+  font-weight: normal;
+  color: #555;
+  font-size: 0.85rem;
+  flex: 0 0 auto;
+}
+
+.calciatore-empty {
+  font-style: italic;
+  color: #999;
+  font-size: 0.9rem;
+}

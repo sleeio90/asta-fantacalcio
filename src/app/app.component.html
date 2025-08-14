@@ -1,0 +1,28 @@
+<div *ngIf="user$ | async as user">
+  <mat-toolbar color="primary">
+    <span>Asta Fantacalcio</span>
+    <span class="spacer"></span>
+    
+    <!-- Navigation buttons -->
+    <button mat-button (click)="navigateToHome()">
+      <mat-icon>home</mat-icon>
+      Home
+    </button>
+    
+    <!-- User info and logout -->
+    <span class="user-info">
+      <mat-icon>person</mat-icon>
+      {{ user.displayName || user.email }}
+      <span class="user-role" [class.admin-role]="user.role === 'admin'">
+        ({{ user.role === 'admin' ? 'Admin' : 'Giocatore' }})
+      </span>
+    </span>
+    <button mat-icon-button (click)="logout()" title="Logout">
+      <mat-icon>logout</mat-icon>
+    </button>
+  </mat-toolbar>
+</div>
+
+<div class="content-container">
+  <router-outlet></router-outlet>
+</div>

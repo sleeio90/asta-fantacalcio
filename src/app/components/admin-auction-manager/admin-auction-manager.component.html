@@ -1,0 +1,142 @@
+<div class="admin-auction-manager">
+  <!-- Header Card -->
+  <mat-card class="header-card" appearance="outlined">
+    <mat-card-content>
+      <div class="header-content">
+        <div class="title-section">
+          <div class="icon-title">
+            <mat-icon class="dashboard-icon">dashboard</mat-icon>
+            <div class="title-text">
+              <h1 class="main-title">Le Mie Aste</h1>
+              <p class="subtitle">Gestisci e monitora le tue aste fantacalcio</p>
+            </div>
+          </div>
+        </div>
+        <div class="action-section">
+          <button mat-raised-button 
+                  color="primary" 
+                  class="create-button"
+                  (click)="onCreateAuction()">
+            <mat-icon>add_circle</mat-icon>
+            <span>Crea Nuova Asta</span>
+          </button>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Content -->
+  <div *ngIf="myAuctions$ | async as auctions; else loadingTemplate">
+    <!-- No Auctions Card -->
+    <mat-card class="no-auctions-card" *ngIf="auctions.length === 0">
+      <mat-card-content>
+        <mat-icon>auction</mat-icon>
+        <h3>Nessuna asta creata</h3>
+        <p>Inizia creando la tua prima asta fantacalcio!</p>
+        <button mat-raised-button color="primary" (click)="onCreateAuction()">
+          <mat-icon>add</mat-icon>
+          Crea Prima Asta
+        </button>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Auctions Grid -->
+    <div class="auctions-grid" *ngIf="auctions.length > 0">
+      <mat-card class="auction-card" *ngFor="let auction of auctions" (click)="onAuctionClick(auction)">
+        <mat-card-header>
+          <mat-card-title>{{ auction.nome }}</mat-card-title>
+          <mat-card-subtitle>Creata il {{ auction.createdAt | date:'dd/MM/yyyy HH:mm' }}</mat-card-subtitle>
+        </mat-card-header>
+        
+        <mat-card-content>
+          <div class="auction-details">
+            <!-- Codice Invito -->
+            <div class="detail-row">
+              <span class="label">Codice Invito:</span>
+              <div class="invite-code">
+                <code class="code-badge">{{ auction.codiceInvito }}</code>
+                <button mat-icon-button 
+                        matTooltip="Copia codice invito" 
+                        (click)="$event.stopPropagation()"
+                        [cdkCopyToClipboard]="auction.codiceInvito">
+                  <mat-icon>content_copy</mat-icon>
+                </button>
+              </div>
+            </div>
+
+            <!-- Partecipanti -->
+            <div class="detail-row">
+              <span class="label">Partecipanti:</span>
+              <div class="participants-info">
+                <div class="participants-text">{{ auction.partecipantiIscritti }} / {{ auction.numeroPartecipanti }}</div>
+                <mat-progress-bar 
+                  mode="determinate" 
+                  [value]="(auction.partecipantiIscritti / auction.numeroPartecipanti) * 100">
+                </mat-progress-bar>
+              </div>
+            </div>
+
+            <!-- Calciatori -->
+            <div class="detail-row">
+              <span class="label">Calciatori:</span>
+              <div class="value">
+                {{ auction.calciatori.length }}
+                <mat-icon *ngIf="auction.calciatori.length === 0" color="warn">warning</mat-icon>
+                <mat-icon *ngIf="auction.calciatori.length > 0" color="primary">check_circle</mat-icon>
+              </div>
+            </div>
+
+            <!-- Stato -->
+            <div class="detail-row">
+              <span class="label">Stato:</span>
+              <div class="status-chip">
+                <mat-chip [color]="getStatusColor(auction)" selected>
+                  {{ getStatusText(auction) }}
+                </mat-chip>
+              </div>
+            </div>
+          </div>
+        </mat-card-content>
+
+        <mat-card-actions>
+          <div class="action-buttons">
+            <!-- Carica Calciatori -->
+            <button mat-icon-button 
+                    matTooltip="Carica calciatori" 
+                    color="accent"
+                    *ngIf="auction.calciatori.length === 0"
+                    (click)="onLoadCalciatori(auction); $event.stopPropagation()">
+              <mat-icon>upload</mat-icon>
+            </button>
+
+            <!-- Azioni Stato -->
+            <button mat-icon-button 
+                    [matTooltip]="auction.isAttiva ? 'Disattiva asta' : 'Attiva asta'"
+                    [color]="auction.isAttiva ? 'warn' : 'accent'"
+                    (click)="onToggleAuctionStatus(auction); $event.stopPropagation()">
+              <mat-icon>{{ auction.isAttiva ? 'pause' : 'play_arrow' }}</mat-icon>
+            </button>
+
+            <!-- Elimina -->
+            <button mat-icon-button 
+                    matTooltip="Elimina asta" 
+                    color="warn"
+                    (click)="onDeleteAuction(auction); $event.stopPropagation()">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </div>
+        </mat-card-actions>
+      </mat-card>
+    </div>
+  </div>
+</div>
+
+<!-- Loading Template -->
+<ng-template #loadingTemplate>
+  <mat-card>
+    <mat-card-content style="text-align: center; padding: 40px;">
+      <mat-spinner diameter="40"></mat-spinner>
+      <p style="margin-top: 16px; color: #666;">Caricamento aste...</p>
+    </mat-card-content>
+  </mat-card>
+</ng-template>

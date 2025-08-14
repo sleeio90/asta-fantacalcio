@@ -1,0 +1,107 @@
+<div class="login-container">
+  <mat-card class="login-card">
+    <mat-card-header>
+      <mat-card-title>
+        <h2>{{ isLogin ? 'Accedi' : 'Registrati' }} - Asta Fantacalcio</h2>
+      </mat-card-title>
+      <mat-card-subtitle>
+        {{ isLogin ? 'Inserisci le tue credenziali per accedere' : 'Crea un nuovo account' }}
+      </mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      <!-- Login Form -->
+      <form *ngIf="isLogin" [formGroup]="loginForm" (ngSubmit)="onLogin()">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Email</mat-label>
+          <input matInput type="email" formControlName="email" placeholder="esempio@email.com">
+          <mat-error>{{ getEmailErrorMessage() }}</mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Password</mat-label>
+          <input matInput [type]="hidePassword ? 'password' : 'text'" formControlName="password">
+          <button mat-icon-button matSuffix (click)="hidePassword = !hidePassword" type="button">
+            <mat-icon>{{ hidePassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+          </button>
+          <mat-error>{{ getPasswordErrorMessage() }}</mat-error>
+        </mat-form-field>
+
+        <div class="button-container">
+          <button mat-raised-button color="primary" type="submit" 
+                  [disabled]="loginForm.invalid || loading" class="full-width">
+            <mat-spinner *ngIf="loading" diameter="20"></mat-spinner>
+            <span *ngIf="!loading">Accedi</span>
+          </button>
+        </div>
+
+        <div class="link-container">
+          <button mat-button type="button" (click)="resetPassword()" [disabled]="loading">
+            Password dimenticata?
+          </button>
+        </div>
+      </form>
+
+      <!-- Registration Form -->
+      <form *ngIf="!isLogin" [formGroup]="registerForm" (ngSubmit)="onRegister()">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Nome completo</mat-label>
+          <input matInput formControlName="displayName" placeholder="Mario Rossi">
+          <mat-error *ngIf="registerForm.get('displayName')?.hasError('required')">
+            Nome è richiesto
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Email</mat-label>
+          <input matInput type="email" formControlName="email" placeholder="esempio@email.com">
+          <mat-error>{{ getEmailErrorMessage() }}</mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Password</mat-label>
+          <input matInput [type]="hidePassword ? 'password' : 'text'" formControlName="password">
+          <button mat-icon-button matSuffix (click)="hidePassword = !hidePassword" type="button">
+            <mat-icon>{{ hidePassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+          </button>
+          <mat-error>{{ getPasswordErrorMessage() }}</mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Conferma Password</mat-label>
+          <input matInput type="password" formControlName="confirmPassword">
+          <mat-error *ngIf="registerForm.get('confirmPassword')?.hasError('required')">
+            Conferma password è richiesta
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Ruolo</mat-label>
+          <mat-select formControlName="role">
+            <mat-option value="player">Giocatore</mat-option>
+            <mat-option value="admin">Amministratore</mat-option>
+          </mat-select>
+          <mat-hint>Gli amministratori possono gestire calciatori e aste</mat-hint>
+        </mat-form-field>
+
+        <div class="button-container">
+          <button mat-raised-button color="primary" type="submit" 
+                  [disabled]="registerForm.invalid || loading" class="full-width">
+            <mat-spinner *ngIf="loading" diameter="20"></mat-spinner>
+            <span *ngIf="!loading">Registrati</span>
+          </button>
+        </div>
+      </form>
+    </mat-card-content>
+
+    <mat-card-actions>
+      <div class="toggle-container">
+        <span *ngIf="isLogin">Non hai un account?</span>
+        <span *ngIf="!isLogin">Hai già un account?</span>
+        <button mat-button color="accent" (click)="toggleMode()" [disabled]="loading">
+          {{ isLogin ? 'Registrati' : 'Accedi' }}
+        </button>
+      </div>
+    </mat-card-actions>
+  </mat-card>
+</div>

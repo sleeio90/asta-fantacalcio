@@ -1,0 +1,75 @@
+<div class="mat-elevation-z8">
+  <table mat-table [dataSource]="dataSource" matSort>
+    <!-- ID Column -->
+    <ng-container matColumnDef="id">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>ID</th>
+      <td mat-cell *matCellDef="let calciatore">{{ calciatore.id }}</td>
+    </ng-container>
+
+    <!-- Ruolo Column -->
+    <ng-container matColumnDef="codiceRuolo">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>Ruolo</th>
+      <td mat-cell *matCellDef="let calciatore" [ngClass]="getRuoloClass(calciatore.codiceRuolo)">
+        {{ calciatore.codiceRuolo }}
+      </td>
+    </ng-container>
+
+    <!-- Nome Column -->
+    <ng-container matColumnDef="nome">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>Nome</th>
+      <td mat-cell *matCellDef="let calciatore">{{ calciatore.nome }}</td>
+    </ng-container>
+
+    <!-- Squadra Column -->
+    <ng-container matColumnDef="squadra">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>Squadra</th>
+      <td mat-cell *matCellDef="let calciatore">{{ calciatore.squadra }}</td>
+    </ng-container>
+
+    <!-- Quotazione Attuale Column -->
+    <ng-container matColumnDef="quotazioneAttuale">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>Qt. Attuale</th>
+      <td mat-cell *matCellDef="let calciatore">{{ calciatore.quotazioneAttuale }}</td>
+    </ng-container>
+
+    <!-- Quotazione Iniziale Column -->
+    <ng-container matColumnDef="quotazioneIniziale">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>Qt. Iniziale</th>
+      <td mat-cell *matCellDef="let calciatore">{{ calciatore.quotazioneIniziale }}</td>
+    </ng-container>
+
+    <!-- Differenza Column -->
+    <ng-container matColumnDef="differenza">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>Diff.</th>
+      <td mat-cell *matCellDef="let calciatore">{{ calciatore.differenza }}</td>
+    </ng-container>
+
+    <!-- Actions Column -->
+    <ng-container matColumnDef="actions">
+      <th mat-header-cell *matHeaderCellDef>Azioni</th>
+      <td mat-cell *matCellDef="let calciatore">
+        <button 
+          mat-icon-button 
+          color="primary" 
+          matTooltip="Assegna calciatore"
+          [disabled]="calciatore.assegnato"
+          *ngIf="astaCreata"
+        >
+          <mat-icon>add_shopping_cart</mat-icon>
+        </button>
+      </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+
+    <!-- Row shown when there is no matching data. -->
+    <tr class="mat-row" *matNoDataRow>
+      <td class="mat-cell" [attr.colspan]="displayedColumns.length">
+        Nessun calciatore trovato
+      </td>
+    </tr>
+  </table>
+
+  <mat-paginator [pageSizeOptions]="[10, 25, 50, 100]" showFirstLastButtons></mat-paginator>
+</div>

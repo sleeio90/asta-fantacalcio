@@ -1,0 +1,36 @@
+.full-width {
+  width: 100%;
+}
+
+.info-section {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px;
+  background-color: #f0f7ff;
+  border: 1px solid #2196f3;
+  border-radius: 8px;
+  margin-top: 20px;
+}
+
+.info-icon {
+  color: #2196f3;
+  margin-top: 2px;
+}
+
+.info-content {
+  flex: 1;
+}
+
+.info-content h4 {
+  margin: 0 0 8px 0;
+  color: #1976d2;
+  font-size: 16px;
+}
+
+.info-content p {
+  margin: 0;
+  color: #555;
+  font-size: 14px;
+  line-height: 1.4;
+}

@@ -1,0 +1,88 @@
+.spacer {
+  flex: 1 1 auto;
+}
+
+.content-container {
+  padding: 20px;
+  margin-top: 20px;
+}
+
+mat-toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  
+  button {
+    margin-left: 8px;
+    cursor: pointer !important;
+    
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+    
+    mat-icon {
+      margin-right: 4px;
+    }
+  }
+  
+  .user-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: 16px;
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 14px;
+    
+    .user-role {
+      font-size: 12px;
+      opacity: 0.8;
+      
+      &.admin-role {
+        color: #ffd700;
+        font-weight: 500;
+      }
+    }
+  }
+  
+  button {
+    margin-left: 8px;
+    
+    mat-icon {
+      margin-right: 4px;
+    }
+  }
+}
+
+/* Stili globali per i ruoli */
+.ruolo-portiere {
+  color: #f44336 !important; /* rosso */
+  font-weight: bold;
+}
+
+.ruolo-difensore {
+  color: #4caf50 !important; /* verde */
+  font-weight: bold;
+}
+
+.ruolo-centrocampista {
+  color: #2196f3 !important; /* blu */
+  font-weight: bold;
+}
+
+.ruolo-attaccante {
+  color: #ff9800 !important; /* arancione */
+  font-weight: bold;
+}
+
+/* Stili per i budget */
+.budget-ok {
+  color: #4caf50;
+}
+
+.budget-warning {
+  color: #ff9800;
+}
+
+.budget-danger {
+  color: #f44336;
+}

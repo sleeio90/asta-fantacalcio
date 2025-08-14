@@ -1,0 +1,130 @@
+.login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 20px;
+}
+
+.login-card {
+  width: 100%;
+  max-width: 400px;
+  margin: 0 auto;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  border-radius: 16px;
+  backdrop-filter: blur(4px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.login-card mat-card-header {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.login-card mat-card-title h2 {
+  margin: 0;
+  color: #333;
+  font-weight: 600;
+}
+
+.login-card mat-card-subtitle {
+  color: #666;
+  margin-top: 8px;
+}
+
+.full-width {
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+.button-container {
+  margin: 24px 0 16px 0;
+}
+
+.button-container button {
+  height: 48px;
+  font-size: 16px;
+  font-weight: 500;
+  position: relative;
+}
+
+.button-container mat-spinner {
+  margin-right: 8px;
+}
+
+.link-container {
+  text-align: center;
+  margin-top: 16px;
+}
+
+.toggle-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  margin: 16px 0;
+  color: #666;
+}
+
+.toggle-container span {
+  font-size: 14px;
+}
+
+/* Responsive design */
+@media (max-width: 480px) {
+  .login-container {
+    padding: 10px;
+  }
+  
+  .login-card {
+    margin: 0;
+  }
+}
+
+/* Form field styling */
+.mat-form-field {
+  .mat-form-field-outline {
+    border-radius: 8px;
+  }
+}
+
+/* Loading state */
+.button-container button[disabled] {
+  opacity: 0.7;
+}
+
+/* Success state */
+.mat-raised-button.mat-primary {
+  background: linear-gradient(45deg, #2196F3 30%, #21CBF3 90%);
+  border-radius: 24px;
+}
+
+.mat-raised-button.mat-primary:hover {
+  background: linear-gradient(45deg, #1976D2 30%, #1CB5E0 90%);
+  box-shadow: 0 4px 20px rgba(33, 150, 243, 0.4);
+}
+
+/* Error styling */
+.mat-error {
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+/* Icon button styling */
+.mat-icon-button {
+  width: 40px;
+  height: 40px;
+}
+
+/* Select styling */
+.mat-select {
+  .mat-select-value {
+    color: #333;
+  }
+}
+
+.mat-hint {
+  font-size: 11px;
+  color: #999;
+}

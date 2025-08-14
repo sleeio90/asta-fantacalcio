@@ -1,0 +1,245 @@
+<div class="container" *ngIf="asta">
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title>Gestione Asta: {{ asta.nome }}</mat-card-title>
+      <mat-card-subtitle>Assegna i calciatori ai team</mat-card-subtitle>
+    </mat-card-header>
+    
+    <mat-card-content>
+      <div class="row">
+        <div class="col-md-6">
+          <h3>Assegna Calciatore</h3>
+          <form [formGroup]="assegnazioneForm" (ngSubmit)="onSubmit()">
+            <!-- Filtro per ruoli -->
+            <div class="ruolo-filter-container">
+              <div class="ruolo-filter-label">Filtra per ruolo:</div>
+              <div class="ruolo-filter-buttons">
+                <button type="button" class="ruolo-filter-btn ruolo-portiere" [class.active]="selectedRuoloFilter === 'P'" (click)="onRuoloFilterClick('P')">P</button>
+                <button type="button" class="ruolo-filter-btn ruolo-difensore" [class.active]="selectedRuoloFilter === 'D'" (click)="onRuoloFilterClick('D')">D</button>
+                <button type="button" class="ruolo-filter-btn ruolo-centrocampista" [class.active]="selectedRuoloFilter === 'C'" (click)="onRuoloFilterClick('C')">C</button>
+                <button type="button" class="ruolo-filter-btn ruolo-attaccante" [class.active]="selectedRuoloFilter === 'A'" (click)="onRuoloFilterClick('A')">A</button>
+              </div>
+            </div>
+            
+            <!-- Ricerca calciatore con autocomplete -->
+            <mat-form-field class="full-width">
+              <mat-label>Cerca calciatore</mat-label>
+              <input type="text" 
+                     matInput
+                     [formControl]="searchControl"
+                     [matAutocomplete]="auto"
+                     placeholder="Nome o squadra">
+              <button mat-icon-button matSuffix *ngIf="searchControl.value" (click)="onClearSearch()">
+                <mat-icon>close</mat-icon>
+              </button>
+              <mat-icon matSuffix *ngIf="!searchControl.value">search</mat-icon>
+              <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayFn">
+                <mat-option *ngFor="let calciatore of filteredOptions | async" [value]="calciatore" (click)="onCalciatoreSelected(calciatore)">
+                  <span class="{{getRuoloClass(calciatore.codiceRuolo)}} ruolo-badge">{{calciatore.codiceRuolo}}</span>
+                  <strong>{{calciatore.nome}}</strong> <span class="team-name">({{calciatore.squadra}})</span>
+                </mat-option>
+              </mat-autocomplete>
+            </mat-form-field>
+
+            <!-- Campo nascosto per il calciatoreId -->
+            <input type="hidden" formControlName="calciatoreId">
+            
+            <!-- Visualizzazione del calciatore selezionato -->
+            <div *ngIf="selectedCalciatore" class="selected-player-info">
+              <div class="player-info-header">
+                <div>
+                  <span class="{{getRuoloClass(selectedCalciatore.codiceRuolo)}} ruolo-badge">
+                    {{ selectedCalciatore.codiceRuolo }}
+                  </span>
+                  <strong>{{ selectedCalciatore.nome }}</strong> 
+                  <span class="team-name">({{ selectedCalciatore.squadra }})</span>
+                  - Quotazione: {{ selectedCalciatore.quotazioneAttuale }}
+                </div>
+                <button type="button" mat-icon-button color="warn" (click)="onDeselectCalciatore()">
+                  <mat-icon>close</mat-icon>
+                </button>
+              </div>
+            </div>
+            <mat-error *ngIf="assegnazioneForm.get('calciatoreId')?.hasError('required')">
+              Seleziona un calciatore
+            </mat-error>
+
+            <!-- Dettagli calciatore selezionato -->
+            <div class="calciatore-details" *ngIf="selectedCalciatore">
+              <h4>Dettagli Calciatore</h4>
+              <div class="row">
+                <div class="col-md-4">
+                  <strong>Nome:</strong> {{ selectedCalciatore.nome }}
+                </div>
+                <div class="col-md-4">
+                  <strong>Squadra:</strong> {{ selectedCalciatore.squadra }}
+                </div>
+                <div class="col-md-4">
+                  <strong>Ruolo:</strong> 
+                  <span [ngClass]="getRuoloClass(selectedCalciatore.codiceRuolo)">
+                    {{ selectedCalciatore.codiceRuolo }}
+                    <span *ngIf="selectedCalciatore.ruoloMantra"> ({{ selectedCalciatore.ruoloMantra }})</span>
+                  </span>
+                </div>
+              </div>
+              <div class="row mt-2">
+                <div class="col-md-4">
+                  <strong>Qt. Attuale:</strong> {{ selectedCalciatore.quotazioneAttuale }}
+                </div>
+                <div class="col-md-4">
+                  <strong>Qt. Iniziale:</strong> {{ selectedCalciatore.quotazioneIniziale }}
+                </div>
+                <div class="col-md-4">
+                  <strong>Diff.:</strong> {{ selectedCalciatore.differenza }}
+                </div>
+              </div>
+            </div>
+
+            <!-- Selezione team -->
+            <mat-form-field class="full-width">
+              <mat-label>Seleziona team</mat-label>
+              <mat-select formControlName="teamNome">
+                <mat-option *ngFor="let team of teams" [value]="team.nome" [disabled]="selectedCalciatore && hasRaggiuntolLimite(team, selectedCalciatore.codiceRuolo)">
+                  {{ team.nome }} (Budget: {{ team.budget }})
+                </mat-option>
+              </mat-select>
+              <mat-error *ngIf="assegnazioneForm.get('teamNome')?.hasError('required')">
+                Seleziona un team
+              </mat-error>
+            </mat-form-field>
+
+            <!-- Prezzo -->
+            <mat-form-field class="full-width">
+              <mat-label>Prezzo</mat-label>
+              <input matInput type="number" formControlName="prezzo" min="1">
+              <mat-error *ngIf="assegnazioneForm.get('prezzo')?.hasError('required')">
+                Inserisci un prezzo
+              </mat-error>
+              <mat-error *ngIf="assegnazioneForm.get('prezzo')?.hasError('min')">
+                Il prezzo deve essere almeno 1
+              </mat-error>
+            </mat-form-field>
+
+            <div class="text-center">
+              <button mat-raised-button color="primary" type="submit" [disabled]="assegnazioneForm.invalid">
+                Assegna Calciatore
+              </button>
+            </div>
+          </form>
+        </div>
+        <div class="col-md-6">
+          <h3>Team</h3>
+          <div class="teams-list">
+            <mat-card *ngFor="let team of teams" class="team-card">
+              <mat-card-header>
+                <mat-card-title>{{ team.nome }}</mat-card-title>
+                <mat-card-subtitle>
+                  Budget: {{ team.budget }} / {{ team.budgetIniziale }}
+                </mat-card-subtitle>
+              </mat-card-header>
+              <mat-card-content>
+                <div class="team-calciatori">
+                  <div class="ruolo-container">
+                    <div class="ruolo-label" [ngClass]="getRuoloClass('P')">
+                      Portieri: {{ team.getPortieri().length }}/3
+                    </div>
+                    <div class="ruolo-label" [ngClass]="getRuoloClass('D')">
+                      Difensori: {{ team.getDifensori().length }}/8
+                    </div>
+                    <div class="ruolo-label" [ngClass]="getRuoloClass('C')">
+                      Centrocampisti: {{ team.getCentrocampisti().length }}/8
+                    </div>
+                    <div class="ruolo-label" [ngClass]="getRuoloClass('A')">
+                      Attaccanti: {{ team.getAttaccanti().length }}/6
+                    </div>
+                  </div>
+                  
+                  <!-- Lista calciatori del team -->
+                  <mat-expansion-panel class="mt-3">
+                    <mat-expansion-panel-header>
+                      <mat-panel-title>
+                        Lista Calciatori ({{ team.calciatori.length }})
+                      </mat-panel-title>
+                    </mat-expansion-panel-header>
+                    
+                    <div class="calciatori-lista">
+                      <mat-tab-group>
+                        <mat-tab label="Portieri">
+                          <div class="player-item" *ngFor="let calciatore of team.getPortieri()">
+                            <div class="player-details">
+                              <span class="{{getRuoloClass(calciatore.codiceRuolo)}} ruolo-badge">{{calciatore.codiceRuolo}}</span>
+                              <strong>{{calciatore.nome}}</strong>
+                              <span class="team-name">({{calciatore.squadra}})</span>
+                              <span class="player-price">{{calciatore.prezzoAcquisto}} cr.</span>
+                            </div>
+                            <button mat-icon-button color="warn" (click)="onRemoveCalciatore(team, calciatore)" matTooltip="Rimuovi calciatore">
+                              <mat-icon>delete</mat-icon>
+                            </button>
+                          </div>
+                        </mat-tab>
+                        <mat-tab label="Difensori">
+                          <div class="player-item" *ngFor="let calciatore of team.getDifensori()">
+                            <div class="player-details">
+                              <span class="{{getRuoloClass(calciatore.codiceRuolo)}} ruolo-badge">{{calciatore.codiceRuolo}}</span>
+                              <strong>{{calciatore.nome}}</strong>
+                              <span class="team-name">({{calciatore.squadra}})</span>
+                              <span class="player-price">{{calciatore.prezzoAcquisto}} cr.</span>
+                            </div>
+                            <button mat-icon-button color="warn" (click)="onRemoveCalciatore(team, calciatore)" matTooltip="Rimuovi calciatore">
+                              <mat-icon>delete</mat-icon>
+                            </button>
+                          </div>
+                        </mat-tab>
+                        <mat-tab label="Centrocampisti">
+                          <div class="player-item" *ngFor="let calciatore of team.getCentrocampisti()">
+                            <div class="player-details">
+                              <span class="{{getRuoloClass(calciatore.codiceRuolo)}} ruolo-badge">{{calciatore.codiceRuolo}}</span>
+                              <strong>{{calciatore.nome}}</strong>
+                              <span class="team-name">({{calciatore.squadra}})</span>
+                              <span class="player-price">{{calciatore.prezzoAcquisto}} cr.</span>
+                            </div>
+                            <button mat-icon-button color="warn" (click)="onRemoveCalciatore(team, calciatore)" matTooltip="Rimuovi calciatore">
+                              <mat-icon>delete</mat-icon>
+                            </button>
+                          </div>
+                        </mat-tab>
+                        <mat-tab label="Attaccanti">
+                          <div class="player-item" *ngFor="let calciatore of team.getAttaccanti()">
+                            <div class="player-details">
+                              <span class="{{getRuoloClass(calciatore.codiceRuolo)}} ruolo-badge">{{calciatore.codiceRuolo}}</span>
+                              <strong>{{calciatore.nome}}</strong>
+                              <span class="team-name">({{calciatore.squadra}})</span>
+                              <span class="player-price">{{calciatore.prezzoAcquisto}} cr.</span>
+                            </div>
+                            <button mat-icon-button color="warn" (click)="onRemoveCalciatore(team, calciatore)" matTooltip="Rimuovi calciatore">
+                              <mat-icon>delete</mat-icon>
+                            </button>
+                          </div>
+                        </mat-tab>
+                      </mat-tab-group>
+                    </div>
+                  </mat-expansion-panel>
+                </div>
+              </mat-card-content>
+            </mat-card>
+          </div>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>
+
+<div class="container" *ngIf="!asta">
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title>Nessuna Asta</mat-card-title>
+      <mat-card-subtitle>Non è stata creata nessuna asta</mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      <p>Torna alla home per creare una nuova asta.</p>
+    </mat-card-content>
+    <mat-card-actions>
+      <button mat-raised-button color="primary" [routerLink]="['/']">Torna alla Home</button>
+    </mat-card-actions>
+  </mat-card>
+</div>

@@ -1,0 +1,73 @@
+<mat-card class="auction-joiner-card">
+  <mat-card-header>
+    <mat-card-title>
+      <mat-icon>how_to_reg</mat-icon>
+      Unisciti a un'Asta
+    </mat-card-title>
+    <mat-card-subtitle>Inserisci il codice invito per partecipare a un'asta esistente</mat-card-subtitle>
+  </mat-card-header>
+
+  <mat-card-content>
+    <form [formGroup]="joinForm" (ngSubmit)="onSubmit()">
+      <div class="form-row">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Codice Invito</mat-label>
+          <input 
+            matInput 
+            formControlName="codiceInvito" 
+            placeholder="ABC123"
+            style="text-transform: uppercase"
+            maxlength="6">
+          <mat-icon matSuffix>qr_code</mat-icon>
+          <mat-error *ngIf="codiceInvito?.hasError('required')">
+            Il codice invito è obbligatorio
+          </mat-error>
+          <mat-error *ngIf="codiceInvito?.hasError('minlength') || codiceInvito?.hasError('maxlength')">
+            Il codice deve essere di 6 caratteri
+          </mat-error>
+        </mat-form-field>
+      </div>
+
+      <div class="form-row">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Nome del tuo Team</mat-label>
+          <input 
+            matInput 
+            formControlName="nomeTeam" 
+            placeholder="Es. I Fantastici">
+          <mat-icon matSuffix>groups</mat-icon>
+          <mat-error *ngIf="nomeTeam?.hasError('required')">
+            Il nome del team è obbligatorio
+          </mat-error>
+          <mat-error *ngIf="nomeTeam?.hasError('minlength')">
+            Il nome deve essere di almeno 3 caratteri
+          </mat-error>
+          <mat-error *ngIf="nomeTeam?.hasError('maxlength')">
+            Il nome deve essere di massimo 20 caratteri
+          </mat-error>
+        </mat-form-field>
+      </div>
+
+      <div class="info-section">
+        <mat-icon class="info-icon">info</mat-icon>
+        <p class="info-text">
+          Inserisci il codice a 6 caratteri fornito dall'amministratore dell'asta 
+          e scegli un nome unico per il tuo team.
+        </p>
+      </div>
+    </form>
+  </mat-card-content>
+
+  <mat-card-actions align="end">
+    <button 
+      mat-raised-button 
+      color="primary" 
+      type="submit"
+      [disabled]="!joinForm.valid || isLoading"
+      (click)="onSubmit()">
+      <mat-icon *ngIf="isLoading">hourglass_empty</mat-icon>
+      <mat-icon *ngIf="!isLoading">login</mat-icon>
+      {{ isLoading ? 'Iscrizione...' : 'Unisciti all\'Asta' }}
+    </button>
+  </mat-card-actions>
+</mat-card>

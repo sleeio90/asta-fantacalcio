@@ -1,0 +1,27 @@
+.uploader-container {
+  margin: 20px 0;
+}
+
+.file-input {
+  display: none;
+}
+
+.file-upload {
+  display: flex;
+  align-items: center;
+}
+
+.file-name {
+  margin-left: 15px;
+  font-style: italic;
+}
+
+.spinner {
+  margin-top: 10px;
+}
+
+.hint {
+  margin-top: 10px;
+  font-size: 0.85rem;
+  color: #666;
+}

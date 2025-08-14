@@ -1,0 +1,23 @@
+table {
+  width: 100%;
+}
+
+.mat-column-id {
+  width: 80px;
+}
+
+.mat-column-codiceRuolo {
+  width: 80px;
+}
+
+.mat-column-quotazioneAttuale,
+.mat-column-quotazioneIniziale,
+.mat-column-differenza {
+  width: 100px;
+  text-align: center;
+}
+
+.mat-column-actions {
+  width: 80px;
+  text-align: center;
+}

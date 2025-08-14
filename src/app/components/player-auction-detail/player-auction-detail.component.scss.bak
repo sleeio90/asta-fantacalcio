@@ -1,0 +1,372 @@
+.auction-detail-container {
+  margin-top: 20px;
+  // Rimuovo max-width e centramento per allinearsi agli altri pannelli
+  // max-width: 800px;
+  // margin-left: auto;
+  // margin-right: auto;
+}
+
+.auction-card {
+  margin-bottom: 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+  border: 1px solid #e3f2fd;
+  overflow: hidden;
+
+  mat-card-header {
+    background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%);
+    color: white;
+    padding: 20px 24px;
+    margin: -16px -16px 20px -16px;
+
+    mat-card-title {
+      font-size: 1.4em;
+      font-weight: 600;
+      margin: 0;
+    }
+
+    mat-card-subtitle {
+      color: rgba(255,255,255,0.9);
+      font-size: 1em;
+      margin: 4px 0 0 0;
+    }
+  }
+
+  mat-card-content {
+    padding: 24px !important;
+  }
+}
+
+.auction-info {
+  margin-bottom: 24px;
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+  border: 1px solid #f0f0f0;
+}
+
+.info-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 16px;
+  padding: 12px 16px;
+  background: #fafafa;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: #f0f7ff;
+    transform: translateX(4px);
+  }
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+
+  mat-icon {
+    margin-right: 16px;
+    color: #2196f3;
+    min-width: 24px;
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+  }
+
+  .label {
+    font-weight: 600;
+    margin-right: 12px;
+    min-width: 140px;
+    color: #424242;
+    font-size: 0.95em;
+  }
+
+  .value {
+    color: #1976d2;
+    font-weight: 500;
+    
+    &.code {
+      font-family: 'Courier New', monospace;
+      background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-weight: bold;
+      color: #0d47a1;
+      border: 1px solid #90caf9;
+    }
+  }
+
+  mat-chip {
+    font-weight: 600;
+    font-size: 0.85em;
+  }
+}
+
+.my-team-section {
+  margin: 24px 0;
+  padding: 20px;
+  background: linear-gradient(135deg, #e8f5e8 0%, #f1f8e9 100%);
+  border-radius: 12px;
+  border: 2px solid #4caf50;
+  box-shadow: 0 4px 16px rgba(76, 175, 80, 0.15);
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #4caf50 0%, #8bc34a 100%);
+  }
+
+  h3 {
+    margin-top: 0;
+    margin-bottom: 16px;
+    color: #2e7d32;
+    font-size: 1.2em;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    &::before {
+      content: '⭐';
+      font-size: 1.1em;
+    }
+  }
+
+  .team-info {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: white;
+    padding: 16px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+
+    mat-icon {
+      color: #4caf50;
+      font-size: 24px;
+      width: 24px;
+      height: 24px;
+    }
+
+    .team-name {
+      font-weight: 700;
+      font-size: 1.2em;
+      color: #2e7d32;
+      flex: 1;
+    }
+
+    .team-budget {
+      background: linear-gradient(135deg, #4caf50 0%, #66bb6a 100%);
+      color: white;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-weight: 600;
+      font-size: 0.9em;
+      box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
+    }
+  }
+}
+
+.participants-section {
+  margin-top: 20px;
+
+  h3 {
+    margin-bottom: 16px;
+    color: #333;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .participants-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+    margin-top: 16px;
+  }
+
+  .participant-card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    border: 1px solid #e0e0e0;
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    &.my-team {
+      border-color: #2196f3;
+      background-color: #f3f8ff;
+    }
+
+    mat-card-content {
+      padding: 16px !important;
+    }
+  }
+
+  .participant-info {
+    .participant-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+
+      .participant-icon {
+        color: #666;
+        font-size: 20px;
+        width: 20px;
+        height: 20px;
+        flex-shrink: 0;
+
+        .my-team & {
+          color: #2196f3;
+        }
+      }
+
+      .team-info {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+
+        .team-name {
+          font-weight: 600;
+          font-size: 1.1em;
+          color: #333;
+          line-height: 1.2;
+        }
+
+        .display-name {
+          font-size: 0.85em;
+          color: #666;
+          font-weight: 400;
+          line-height: 1.1;
+        }
+      }
+
+      .you-chip {
+        font-size: 0.8em;
+        height: 24px;
+        flex-shrink: 0;
+      }
+    }
+
+    .budget-info {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #666;
+
+      .budget-icon {
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
+        color: #4caf50;
+      }
+
+      .budget-amount {
+        font-weight: 500;
+        color: #4caf50;
+      }
+    }
+  }
+}
+
+.no-auction {
+  margin-top: 20px;
+  // Rimuovo max-width e centramento per allinearsi agli altri pannelli
+  // max-width: 600px;
+  // margin-left: auto;
+  // margin-right: auto;
+}
+
+.info-card {
+  text-align: center;
+  padding: 40px 20px;
+  background: linear-gradient(135deg, #fff3e0 0%, #ffffff 100%);
+  border-radius: 12px;
+  border: 2px dashed #ff9800;
+  box-shadow: 0 4px 16px rgba(255, 152, 0, 0.1);
+}
+
+.no-auction-content {
+  .large-icon {
+    font-size: 64px;
+    width: 64px;
+    height: 64px;
+    color: #ff9800;
+    margin-bottom: 20px;
+    opacity: 0.8;
+  }
+
+  h3 {
+    margin: 20px 0 12px 0;
+    color: #e65100;
+    font-size: 1.3em;
+    font-weight: 600;
+  }
+
+  p {
+    color: #bf360c;
+    margin: 0;
+    font-size: 1em;
+    line-height: 1.5;
+  }
+}
+
+// Responsive design
+@media (max-width: 600px) {
+  .info-row {
+    flex-direction: column;
+    align-items: flex-start;
+
+    .label {
+      min-width: auto;
+      margin-bottom: 4px;
+    }
+  }
+
+  .my-team-section .team-info {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+
+    .team-budget {
+      margin-left: 0;
+    }
+  }
+
+  .participants-section {
+    .participants-grid {
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+
+    .participant-card {
+      mat-card-content {
+        padding: 12px !important;
+      }
+    }
+
+    .participant-info .participant-header {
+      flex-wrap: wrap;
+      gap: 8px;
+
+      .team-info {
+        min-width: 0; // Permette il text wrapping
+      }
+
+      .you-chip {
+        order: 3;
+        align-self: flex-start;
+      }
+    }
+  }
+}

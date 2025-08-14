@@ -1,0 +1,100 @@
+<div *ngIf="userAuctions$ | async as auctions" class="auctions-container">
+  <div *ngIf="auctions.length === 0" class="no-auctions">
+    <mat-card>
+      <mat-card-content>
+        <div class="no-auctions-content">
+          <mat-icon>info</mat-icon>
+          <h3>Nessuna asta</h3>
+          <p>Non sei iscritto a nessuna asta. Usa il pannello qui sotto per unirti a un'asta.</p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <mat-expansion-panel *ngIf="auctions.length > 0" 
+                       [expanded]="true" 
+                       class="auctions-expansion-panel">
+    <mat-expansion-panel-header>
+      <mat-panel-title>
+        <mat-icon>sports_soccer</mat-icon>
+        <span>Le Tue Aste ({{ auctions.length }})</span>
+      </mat-panel-title>
+      <mat-panel-description>
+        Aste a cui sei iscritto
+      </mat-panel-description>
+    </mat-expansion-panel-header>
+    
+    <div class="expansion-content">
+      <div class="auctions-grid">
+        <mat-card class="auction-card" *ngFor="let auction of auctions; trackBy: trackByAuctionId">
+        <mat-card-header>
+          <mat-card-title>{{ auction.nome }}</mat-card-title>
+          <mat-card-subtitle>
+            Admin: {{ getAdminDisplayName(auction.id!, adminDisplayNames$ | async) }}
+          </mat-card-subtitle>
+        </mat-card-header>
+        
+        <mat-card-content>
+          <div class="card-main-content">
+            <!-- Informazioni principali in righe -->
+            <div class="auction-info">
+              <div class="info-row">
+                <span class="label">Partecipanti</span>
+                <span class="value">{{ auction.partecipantiIscritti }}/{{ auction.numeroPartecipanti }}</span>
+              </div>
+              
+              <div class="info-row">
+                <span class="label">Budget</span>
+                <span class="value">{{ auction.creditiPerPartecipante || 500 }} crediti</span>
+              </div>
+              
+              <div class="info-row">
+                <span class="label">Stato</span>
+                <mat-chip [color]="getStatusColor(auction)" selected class="status-chip">
+                  {{ getStatusText(auction) }}
+                </mat-chip>
+              </div>
+              
+              <div class="info-row">
+                <span class="label">Codice Invito</span>
+                <span class="value code">{{ auction.codiceInvito }}</span>
+              </div>
+            </div>
+
+            <!-- Il tuo team e partecipanti in due colonne -->
+            <div class="bottom-section">
+              <!-- Lista partecipanti con toggle -->
+              <mat-expansion-panel class="participants-expansion">
+                <mat-expansion-panel-header>
+                  <mat-panel-title>
+                    Partecipanti ({{ auction.teams?.length || 0 }})
+                  </mat-panel-title>
+                </mat-expansion-panel-header>
+                
+                <div class="participants-list">
+                  <div *ngFor="let team of auction.teams; trackBy: trackByTeam" class="participant-item">
+                    <div class="participant-info">
+                      <span class="team-name">{{ team.nome }}</span>
+                      <span class="participant-name">
+                        {{ getParticipantDisplayName(team, getAuctionParticipants(auction.id!, participantsDisplayNames$ | async)) }}
+                      </span>
+                    </div>
+                    <span class="team-budget">{{ team.budget || auction.creditiPerPartecipante }} crediti</span>
+                  </div>
+                </div>
+              </mat-expansion-panel>
+            </div>
+          </div>
+
+          <!-- Pulsante accesso asta -->
+          <div class="auction-actions" *ngIf="isAuctionAccessible(auction)">
+            <button mat-raised-button color="primary" (click)="accessAuction(auction)">
+              Accedi all'Asta
+            </button>
+          </div>
+        </mat-card-content>
+      </mat-card>
+      </div>
+    </div>
+  </mat-expansion-panel>
+</div>

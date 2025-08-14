@@ -1,0 +1,78 @@
+<h2 mat-dialog-title>Crea Nuova Asta</h2>
+
+<form [formGroup]="astaForm" (ngSubmit)="onSubmit()">
+  <mat-dialog-content>
+    <div class="row">
+      <div class="col-md-12">
+        <mat-form-field class="full-width">
+          <mat-label>Nome Asta</mat-label>
+          <input matInput formControlName="nome" placeholder="Inserisci un nome per l'asta">
+          <mat-error *ngIf="astaForm.get('nome')?.hasError('required')">
+            Il nome è obbligatorio
+          </mat-error>
+          <mat-error *ngIf="astaForm.get('nome')?.hasError('minlength')">
+            Il nome deve avere almeno 3 caratteri
+          </mat-error>
+        </mat-form-field>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-md-6">
+        <mat-form-field class="full-width">
+          <mat-label>Numero Partecipanti</mat-label>
+          <input matInput type="number" formControlName="numeroPartecipanti" min="{{minPartecipanti}}" max="{{maxPartecipanti}}">
+          <mat-error *ngIf="astaForm.get('numeroPartecipanti')?.invalid">
+            Il numero di partecipanti deve essere compreso tra {{minPartecipanti}} e {{maxPartecipanti}}
+          </mat-error>
+        </mat-form-field>
+      </div>
+      <div class="col-md-6">
+        <mat-form-field class="full-width">
+          <mat-label>Crediti per Partecipante</mat-label>
+          <input matInput type="number" formControlName="creditiPerPartecipante" min="1">
+          <mat-error *ngIf="astaForm.get('creditiPerPartecipante')?.invalid">
+            Il budget deve essere almeno 1
+          </mat-error>
+        </mat-form-field>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-md-12">
+        <mat-form-field class="full-width">
+          <mat-label>Nome del tuo Team</mat-label>
+          <input matInput formControlName="nomeTeamAmministratore" placeholder="Es. I Fantastici">
+          <mat-icon matSuffix>person</mat-icon>
+          <mat-error *ngIf="astaForm.get('nomeTeamAmministratore')?.hasError('required')">
+            Il nome del tuo team è obbligatorio
+          </mat-error>
+          <mat-error *ngIf="astaForm.get('nomeTeamAmministratore')?.hasError('minlength')">
+            Il nome deve essere di almeno 3 caratteri
+          </mat-error>
+          <mat-error *ngIf="astaForm.get('nomeTeamAmministratore')?.hasError('maxlength')">
+            Il nome deve essere di massimo 20 caratteri
+          </mat-error>
+        </mat-form-field>
+      </div>
+    </div>
+
+    <div class="info-section">
+      <mat-icon class="info-icon">info</mat-icon>
+      <div class="info-content">
+        <h4>Come funziona</h4>
+        <p>
+          Una volta creata l'asta, riceverai un <strong>codice invito</strong> da condividere con i partecipanti.
+          Tu sarai automaticamente iscritto come primo partecipante con il nome team che scegli qui.
+          I giocatori potranno iscriversi all'asta inserendo il codice e scegliendo il nome del loro team.
+          Il numero massimo di partecipanti sarà limitato al valore che imposti.
+        </p>
+      </div>
+    </div>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-button type="button" (click)="onCancel()">Annulla</button>
+    <button mat-raised-button color="primary" type="submit" [disabled]="astaForm.invalid">Crea Asta</button>
+  </mat-dialog-actions>
+</form>

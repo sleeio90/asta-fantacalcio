@@ -1,0 +1,168 @@
+.full-width {
+  width: 100%;
+  margin-bottom: 15px;
+}
+
+.selected-player-info {
+  background-color: #f5f5f5;
+  padding: 10px 15px;
+  border-radius: 4px;
+  margin-bottom: 15px;
+  border-left: 4px solid #3f51b5;
+}
+
+.player-info-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.ruolo-badge {
+  display: inline-block;
+  width: 24px;
+  height: 24px;
+  line-height: 24px;
+  text-align: center;
+  border-radius: 50%;
+  margin-right: 8px;
+  font-weight: normal;
+  color: white;
+}
+
+.ruolo-filter-container {
+  margin-bottom: 15px;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.ruolo-filter-label {
+  margin-right: 10px;
+  font-size: 0.9rem;
+  color: #555;
+}
+
+.ruolo-filter-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.ruolo-filter-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 4px;
+  border: none;
+  color: white;
+  font-weight: normal;
+  cursor: pointer;
+  opacity: 0.7;
+  transition: all 0.2s;
+}
+
+.ruolo-filter-btn.active {
+  opacity: 1;
+  transform: scale(1.1);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.ruolo-portiere {
+  background-color: #ffcb05;
+  color: white;
+}
+
+.ruolo-difensore {
+  background-color: #4caf50;
+  color: white;
+}
+
+.ruolo-centrocampista {
+  background-color: #03a9f4;
+  color: white;
+}
+
+.ruolo-attaccante {
+  background-color: #f44336;
+  color: white;
+}
+
+.team-name {
+  color: #666;
+  font-style: italic;
+}
+
+.calciatore-details {
+  background-color: #f5f5f5;
+  padding: 15px;
+  border-radius: 5px;
+  margin-bottom: 15px;
+}
+
+.calciatore-details h4 {
+  margin-top: 0;
+  margin-bottom: 15px;
+  color: #3f51b5;
+}
+
+.teams-list {
+  max-height: 500px;
+  overflow-y: auto;
+}
+
+.team-card {
+  margin-bottom: 15px;
+}
+
+.team-calciatori {
+  margin-top: 10px;
+}
+
+.ruolo-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.ruolo-label {
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-weight: normal;
+  color: white;
+}
+
+.player-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 10px;
+  border-bottom: 1px solid #eee;
+}
+
+.player-item:last-child {
+  border-bottom: none;
+}
+
+.player-details {
+  display: flex;
+  align-items: center;
+  flex: 1;
+}
+
+.player-price {
+  margin-left: auto;
+  font-weight: normal;
+  color: #3f51b5;
+  margin-right: 10px;
+}
+
+.calciatori-lista {
+  margin-top: 10px;
+}
+
+.mt-3 {
+  margin-top: 15px;
+}
+
+h3 {
+  color: #3f51b5;
+  margin-bottom: 20px;
+}

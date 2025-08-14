@@ -1,0 +1,36 @@
+<div class="uploader-container">
+  <input
+    type="file"
+    class="file-input"
+    (change)="onFileSelected($event)"
+    #fileUpload
+    accept=".xlsx"
+  />
+
+  <div class="file-upload">
+    <button 
+      mat-raised-button 
+      color="primary" 
+      (click)="fileUpload.click()"
+      [disabled]="isLoading"
+    >
+      <mat-icon>cloud_upload</mat-icon>
+      Carica File XLSX
+    </button>
+    
+    <span class="file-name" *ngIf="fileName">
+      {{ fileName }}
+    </span>
+  </div>
+
+  <mat-progress-spinner
+    *ngIf="isLoading"
+    mode="indeterminate"
+    diameter="30"
+    class="spinner"
+  ></mat-progress-spinner>
+  
+  <p class="hint">
+    Il file deve contenere almeno le colonne: Id, R, RM, Nome, Squadra, Ruolo, Qt.A, Qt.I, Diff., Qt.A M, Qt.I M, Diff. M, FMV, FMV M
+  </p>
+</div>

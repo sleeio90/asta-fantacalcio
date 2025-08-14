@@ -1,0 +1,145 @@
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.admin-welcome {
+  margin-bottom: 24px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  
+  .welcome-content {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    
+    .admin-icon {
+      font-size: 48px;
+      width: 48px;
+      height: 48px;
+      color: #ffd700;
+    }
+    
+    h2 {
+      margin: 0 0 8px 0;
+      font-weight: 600;
+    }
+    
+    p {
+      margin: 0;
+      opacity: 0.9;
+    }
+  }
+}
+
+.player-welcome {
+  margin-bottom: 24px;
+  background: linear-gradient(135deg, #4caf50 0%, #2e7d32 100%);
+  color: white;
+  
+  .welcome-content {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    
+    .player-icon {
+      font-size: 48px;
+      width: 48px;
+      height: 48px;
+      color: #fff8e1;
+    }
+    
+    h2 {
+      margin: 0 0 8px 0;
+      font-weight: 600;
+    }
+    
+    p {
+      margin: 0;
+      opacity: 0.9;
+    }
+  }
+}
+
+h3 {
+  color: #3f51b5;
+  margin-top: 20px;
+  margin-bottom: 15px;
+}
+
+.search-field {
+  width: 100%;
+  max-width: 400px;
+}
+
+.filter-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  flex-wrap: wrap;
+}
+
+.info-text {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #666;
+  font-size: 14px;
+  margin-bottom: 16px;
+
+  .info-icon {
+    color: #2196f3;
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+}
+
+.ml-2 {
+  margin-left: 8px;
+}
+
+.mt-3 {
+  margin-top: 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+// Stili per il pannello espandibile "Unisciti a un'asta"
+.join-auction-panel {
+  margin-top: 20px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+
+  mat-expansion-panel-header {
+    .mat-expansion-panel-header-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: #2196f3;
+      font-weight: 500;
+
+      mat-icon {
+        color: #2196f3;
+      }
+    }
+
+    .mat-expansion-panel-header-description {
+      color: #666;
+      font-size: 0.9em;
+    }
+  }
+
+  .expansion-content {
+    padding: 16px 0;
+  }
+
+  &.mat-expanded {
+    border-color: #2196f3;
+    box-shadow: 0 4px 12px rgba(33, 150, 243, 0.15);
+  }
+}
