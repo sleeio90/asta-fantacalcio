@@ -53,6 +53,10 @@ export class AstaService {
     return this.firebaseService.getAstaByCode(codiceInvito);
   }
 
+  getAstaById(astaId: string): Observable<Asta | null> {
+    return this.firebaseService.getAstaById(astaId);
+  }
+
   getMyAste(userId: string): Observable<Asta[]> {
     return this.firebaseService.getMyAste(userId);
   }
@@ -98,9 +102,9 @@ export class AstaService {
     return this.firebaseService.getCurrentAsta();
   }
 
-  assegnaCalciatore(calciatore: Calciatore, team: Team, prezzo: number): Observable<boolean> {
+  assegnaCalciatore(calciatore: Calciatore, team: Team, prezzo: number, astaId?: string): Observable<boolean> {
     return new Observable(observer => {
-      this.firebaseService.assegnaCalciatore(calciatore, team, prezzo).then(success => {
+      this.firebaseService.assegnaCalciatore(calciatore, team, prezzo, astaId).then(success => {
         observer.next(success);
         observer.complete();
       }).catch(error => {
@@ -109,9 +113,9 @@ export class AstaService {
     });
   }
 
-  rimuoviAssegnazione(calciatore: Calciatore): Observable<boolean> {
+  rimuoviAssegnazione(calciatore: Calciatore, astaId?: string): Observable<boolean> {
     return new Observable(observer => {
-      this.firebaseService.rimuoviAssegnazione(calciatore).then(success => {
+      this.firebaseService.rimuoviAssegnazione(calciatore, astaId).then(success => {
         observer.next(success);
         observer.complete();
       }).catch(error => {
@@ -120,8 +124,8 @@ export class AstaService {
     });
   }
   
-  rimuoviCalciatore(calciatore: Calciatore, team: Team): Observable<boolean> {
-    return this.rimuoviAssegnazione(calciatore);
+  rimuoviCalciatore(calciatore: Calciatore, team: Team, astaId?: string): Observable<boolean> {
+    return this.rimuoviAssegnazione(calciatore, astaId);
   }
 
   getTeams(): Team[] {

@@ -3,6 +3,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { AstaService } from '../../services/asta.service';
 import { NotificationsService } from '../../services/notifications.service';
 import { Team } from '../../models/team.model';
+import { Asta } from '../../models/asta.model';
 import { Calciatore } from '../../models/calciatore.model';
 import { Subscription } from 'rxjs';
 
@@ -13,6 +14,7 @@ import { Subscription } from 'rxjs';
 })
 export class TeamDetailComponent implements OnInit, OnChanges, OnDestroy {
   @Input() teamNome: string = '';
+  @Input() asta: Asta | null = null; // Aggiungiamo l'asta come input
   team: Team | null = null;
   ruoli = ['P', 'D', 'C', 'A'];
   displayedColumns: string[] = ['ruolo', 'nome', 'squadra', 'quotazioneAttuale', 'quotazioneIniziale', 'prezzoAcquisto', 'actions'];
@@ -41,7 +43,7 @@ export class TeamDetailComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['teamNome']) {
+    if (changes['teamNome'] || changes['asta']) {
       this.loadTeam();
     }
   }
@@ -51,6 +53,16 @@ export class TeamDetailComponent implements OnInit, OnChanges, OnDestroy {
       return;
     }
 
+    // Se abbiamo l'asta come input, usala direttamente
+    if (this.asta) {
+      this.team = this.asta.teams.find(t => t.nome === this.teamNome) || null;
+      if (!this.team) {
+        console.warn(`Team ${this.teamNome} non trovato nell'asta fornita ${this.asta.id}`);
+      }
+      return;
+    }
+
+    // Altrimenti, usa il metodo originale per caricare dall'asta corrente
     // Unsubscribe dalla subscription precedente se esiste
     if (this.astaSubscription) {
       this.astaSubscription.unsubscribe();

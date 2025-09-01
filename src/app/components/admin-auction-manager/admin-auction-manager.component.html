@@ -42,7 +42,11 @@
 
     <!-- Auctions Grid -->
     <div class="auctions-grid" *ngIf="auctions.length > 0">
-      <mat-card class="auction-card" *ngFor="let auction of auctions" (click)="onAuctionClick(auction)">
+      <mat-card class="auction-card" 
+                *ngFor="let auction of auctions" 
+                [class.clickable]="auction.isAttiva && auction.partecipantiIscritti >= auction.numeroPartecipanti"
+                [class.disabled-card]="!auction.isAttiva || auction.partecipantiIscritti < auction.numeroPartecipanti"
+                (click)="onAuctionClick(auction)">
         <mat-card-header>
           <mat-card-title>{{ auction.nome }}</mat-card-title>
           <mat-card-subtitle>Creata il {{ auction.createdAt | date:'dd/MM/yyyy HH:mm' }}</mat-card-subtitle>
@@ -76,16 +80,6 @@
               </div>
             </div>
 
-            <!-- Calciatori -->
-            <div class="detail-row">
-              <span class="label">Calciatori:</span>
-              <div class="value">
-                {{ auction.calciatori.length }}
-                <mat-icon *ngIf="auction.calciatori.length === 0" color="warn">warning</mat-icon>
-                <mat-icon *ngIf="auction.calciatori.length > 0" color="primary">check_circle</mat-icon>
-              </div>
-            </div>
-
             <!-- Stato -->
             <div class="detail-row">
               <span class="label">Stato:</span>
@@ -95,20 +89,27 @@
                 </mat-chip>
               </div>
             </div>
+
+            <!-- Messaggio di stato per la gestione -->
+            <div *ngIf="!auction.isAttiva" class="warning-message">
+              <mat-icon color="warn">info</mat-icon>
+              <span>Attiva l'asta per permettere l'accesso alla gestione</span>
+            </div>
+            
+            <div *ngIf="auction.isAttiva && auction.partecipantiIscritti < auction.numeroPartecipanti" class="warning-message">
+              <mat-icon color="warn">group</mat-icon>
+              <span>Aspetta che tutti i partecipanti si iscrivano ({{ auction.partecipantiIscritti }}/{{ auction.numeroPartecipanti }})</span>
+            </div>
+            
+            <div *ngIf="auction.isAttiva && auction.partecipantiIscritti >= auction.numeroPartecipanti" class="success-message">
+              <mat-icon color="primary">check_circle</mat-icon>
+              <span>Clicca per accedere alla gestione dell'asta</span>
+            </div>
           </div>
         </mat-card-content>
 
         <mat-card-actions>
           <div class="action-buttons">
-            <!-- Carica Calciatori -->
-            <button mat-icon-button 
-                    matTooltip="Carica calciatori" 
-                    color="accent"
-                    *ngIf="auction.calciatori.length === 0"
-                    (click)="onLoadCalciatori(auction); $event.stopPropagation()">
-              <mat-icon>upload</mat-icon>
-            </button>
-
             <!-- Azioni Stato -->
             <button mat-icon-button 
                     [matTooltip]="auction.isAttiva ? 'Disattiva asta' : 'Attiva asta'"

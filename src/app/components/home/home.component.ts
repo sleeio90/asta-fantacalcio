@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
+import { Router } from '@angular/router';
 import { AstaService } from '../../services/asta.service';
 import { AuthService, UserProfile } from '../../services/auth.service';
 import { NotificationsService } from '../../services/notifications.service';
@@ -20,7 +21,8 @@ export class HomeComponent implements OnInit {
     private astaService: AstaService,
     private authService: AuthService,
     private notificationsService: NotificationsService,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private router: Router
   ) {
     this.user$ = this.authService.user$;
   }
@@ -31,8 +33,9 @@ export class HomeComponent implements OnInit {
 
   onAuctionSelected(auction: Asta): void {
     this.selectedAuction = auction;
-    this.notificationsService.showInfo(`Asta "${auction.nome}" selezionata per la gestione`);
-    // TODO: Navigare alla gestione dell'asta specifica
+    console.log('Navigazione all\'asta admin:', auction);
+    // Naviga alla gestione admin dell'asta specifica
+    this.router.navigate(['/admin/auction', auction.id]);
   }
 
   onAuctionJoined(success: boolean): void {

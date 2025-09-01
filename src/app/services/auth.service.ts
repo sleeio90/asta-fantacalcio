@@ -17,7 +17,10 @@ export interface UserProfile {
 })
 export class AuthService {
   private userSubject = new BehaviorSubject<UserProfile | null>(null);
+  private authLoadingSubject = new BehaviorSubject<boolean>(true);
+  
   public user$ = this.userSubject.asObservable();
+  public authLoading$ = this.authLoadingSubject.asObservable();
 
   constructor(
     private afAuth: AngularFireAuth,
@@ -31,11 +34,13 @@ export class AuthService {
           return this.db.object<UserProfile>(`users/${user.uid}`).valueChanges();
         } else {
           // User is logged out
+          this.authLoadingSubject.next(false); // Auth check completed
           return of(null);
         }
       })
     ).subscribe(userProfile => {
       this.userSubject.next(userProfile);
+      this.authLoadingSubject.next(false); // Auth check completed
     });
   }
 

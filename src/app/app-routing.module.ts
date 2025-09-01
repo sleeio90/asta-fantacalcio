@@ -4,6 +4,7 @@ import { HomeComponent } from './components/home/home.component';
 import { LoginComponent } from './components/login/login.component';
 import { AuctionTableComponent } from './components/auction-table/auction-table.component';
 import { TeamDetailComponent } from './components/team-detail/team-detail.component';
+import { TeamManagerComponent } from './components/team-manager/team-manager.component';
 import { AuthGuard, AdminGuard, LoginGuard } from './guards/auth.guard';
 
 const routes: Routes = [
@@ -26,6 +27,11 @@ const routes: Routes = [
     path: 'auction-table/:astaId', 
     component: AuctionTableComponent,
     canActivate: [AuthGuard]
+  },
+  { 
+    path: 'admin/auction/:astaId', 
+    component: TeamManagerComponent,
+    canActivate: [AdminGuard]
   },
   { 
     path: 'riepilogo', 

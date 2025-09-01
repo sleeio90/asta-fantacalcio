@@ -14,7 +14,6 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { HomeComponent } from './components/home/home.component';
 import { LoginComponent } from './components/login/login.component';
-import { XlsxUploaderComponent } from './components/xlsx-uploader/xlsx-uploader.component';
 import { CalciatoriTableComponent } from './components/calciatori-table/calciatori-table.component';
 import { TeamManagerComponent } from './components/team-manager/team-manager.component';
 import { AuctionCreatorComponent } from './components/auction-creator/auction-creator.component';
@@ -52,7 +51,6 @@ import { ClipboardModule } from '@angular/cdk/clipboard';
     AppComponent,
     HomeComponent,
     LoginComponent,
-    XlsxUploaderComponent,
     CalciatoriTableComponent,
     TeamManagerComponent,
     AuctionCreatorComponent,

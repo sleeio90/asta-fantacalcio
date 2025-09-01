@@ -61,7 +61,24 @@ export class LoginComponent implements OnInit {
     try {
       await this.authService.signIn(email, password);
       this.snackBar.open('Login successful!', 'Close', { duration: 3000 });
-      // Il redirect sarà gestito automaticamente dall'observable in ngOnInit
+      
+      // Controlla se c'è un URL di redirect salvato
+      const redirectUrl = localStorage.getItem('redirectUrl');
+      if (redirectUrl) {
+        localStorage.removeItem('redirectUrl');
+        this.router.navigate([redirectUrl]);
+      } else {
+        // Redirect normale basato sul ruolo
+        this.authService.user$.subscribe(user => {
+          if (user) {
+            if (user.role === 'admin') {
+              this.router.navigate(['/home']);
+            } else {
+              this.router.navigate(['/auction-table']);
+            }
+          }
+        });
+      }
     } catch (error: any) {
       console.error('Login error:', error);
       this.snackBar.open(error.message || 'Login failed', 'Close', { duration: 5000 });

@@ -1,4 +1,12 @@
 <div class="container" *ngIf="asta">
+  <!-- Header con pulsante di ritorno -->
+  <div class="header-section">
+    <button mat-raised-button color="primary" (click)="goBack()" class="back-button">
+      <mat-icon>arrow_back</mat-icon>
+      Torna alle Aste
+    </button>
+  </div>
+
   <mat-card>
     <mat-card-header>
       <mat-card-title>Gestione Asta: {{ asta.nome }}</mat-card-title>

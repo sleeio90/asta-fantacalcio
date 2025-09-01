@@ -1,6 +1,8 @@
 import { Component, OnInit, Output, EventEmitter } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { AstaService } from '../../services/asta.service';
+import { CalciatoriService } from '../../services/calciatori.service';
+import { FirebaseAstaService } from '../../services/firebase-asta.service';
 import { AuthService, UserProfile } from '../../services/auth.service';
 import { NotificationsService } from '../../services/notifications.service';
 import { AuctionCreatorComponent } from '../auction-creator/auction-creator.component';
@@ -17,10 +19,12 @@ export class AdminAuctionManagerComponent implements OnInit {
   
   myAuctions$: Observable<Asta[]> | null = null;
   user: UserProfile | null = null;
-  displayedColumns: string[] = ['nome', 'codiceInvito', 'partecipanti', 'calciatori', 'stato', 'createdAt', 'actions'];
+  displayedColumns: string[] = ['nome', 'codiceInvito', 'partecipanti', 'stato', 'createdAt', 'actions'];
 
   constructor(
     private astaService: AstaService,
+    private calciatoriService: CalciatoriService,
+    private firebaseAstaService: FirebaseAstaService,
     private authService: AuthService,
     private notificationsService: NotificationsService,
     private dialog: MatDialog
@@ -72,21 +76,6 @@ export class AdminAuctionManagerComponent implements OnInit {
     }
   }
 
-  onLoadCalciatori(auction: Asta): void {
-    if (auction.id) {
-      this.astaService.loadCalciatoriIntoAsta(auction.id).subscribe({
-        next: () => {
-          this.notificationsService.showSuccess(`Calciatori caricati nell'asta "${auction.nome}" con successo`);
-          this.loadMyAuctions();
-        },
-        error: (error) => {
-          console.error('Errore nel caricamento dei calciatori:', error);
-          this.notificationsService.showError('Errore nel caricamento dei calciatori: ' + error.message);
-        }
-      });
-    }
-  }
-
   onToggleAuctionStatus(auction: Asta): void {
     auction.isAttiva = !auction.isAttiva;
     this.astaService.updateAsta(auction).subscribe({
@@ -115,6 +104,22 @@ export class AdminAuctionManagerComponent implements OnInit {
   }
 
   onAuctionClick(auction: Asta): void {
+    // Verifica che l'asta sia attiva
+    if (!auction.isAttiva) {
+      this.notificationsService.showError('L\'asta deve essere attiva per poter accedere alla gestione');
+      return;
+    }
+
+    // Verifica che tutti i partecipanti siano iscritti
+    if (auction.partecipantiIscritti < auction.numeroPartecipanti) {
+      this.notificationsService.showError(
+        `L'asta deve essere completa per iniziare. ` +
+        `Partecipanti attuali: ${auction.partecipantiIscritti}/${auction.numeroPartecipanti}`
+      );
+      return;
+    }
+
+    // Se tutte le condizioni sono soddisfatte, procedi con la gestione
     this.auctionSelected.emit(auction);
   }
 }

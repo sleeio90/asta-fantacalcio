@@ -1,5 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, FormControl } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Observable, Subscription } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 import { AstaService } from '../../services/asta.service';
@@ -29,6 +30,8 @@ export class TeamManagerComponent implements OnInit, OnDestroy {
 
   constructor(
     private fb: FormBuilder,
+    private route: ActivatedRoute,
+    private router: Router,
     private astaService: AstaService,
     private calciatoriService: CalciatoriService,
     private notificationsService: NotificationsService
@@ -41,32 +44,53 @@ export class TeamManagerComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    // Ascolta i cambiamenti dell'asta in tempo reale
-    this.astaSubscription = this.astaService.getAsta().subscribe(asta => {
-      console.log('Team Manager: Ricevuta asta aggiornata', asta);
-      this.asta = asta;
-      if (asta) {
-        this.teams = asta.teams;
-        this.filteredCalciatori = asta.calciatoriDisponibili;
-        console.log('Team Manager: Calciatori disponibili:', this.filteredCalciatori.length);
-        
-        // Reinizializza il filtro dell'autocomplete ogni volta che cambiano i dati
-        this.initFilteredOptions();
-        
-        // Applica il filtro per ruolo se è stato selezionato
-        if (this.selectedRuoloFilter) {
-          this.onRuoloFilterClick(this.selectedRuoloFilter);
+    // Leggi l'ID dell'asta dalla rotta
+    const astaId = this.route.snapshot.paramMap.get('astaId');
+    
+    if (astaId) {
+      // Carica l'asta specifica
+      this.astaSubscription = this.astaService.getAstaById(astaId).subscribe((asta: Asta | null) => {
+        console.log('Team Manager: Ricevuta asta aggiornata', asta);
+        this.asta = asta;
+        if (asta) {
+          this.teams = asta.teams;
+          
+          // Carica sempre tutti i calciatori dal JSON statico
+          this.calciatoriService.getCalciatori().subscribe(calciatori => {
+            // Filtra solo i calciatori NON assegnati in questa asta
+            const calciatoriAssegnatiIds = new Set<number>();
+            asta.teams.forEach(team => {
+              team.calciatori.forEach(calc => {
+                calciatoriAssegnatiIds.add(calc.id);
+              });
+            });
+            
+            this.filteredCalciatori = calciatori.filter(c => !calciatoriAssegnatiIds.has(c.id));
+            console.log('Team Manager: Calciatori disponibili:', this.filteredCalciatori.length);
+            console.log('Team Manager: Calciatori assegnati:', calciatoriAssegnatiIds.size);
+            
+            // Reinizializza il filtro dell'autocomplete
+            this.initFilteredOptions();
+            
+            // Applica il filtro per ruolo se è stato selezionato
+            if (this.selectedRuoloFilter) {
+              this.onRuoloFilterClick(this.selectedRuoloFilter);
+            }
+          });
+        } else {
+          this.teams = [];
+          this.filteredCalciatori = [];
+          console.log('Team Manager: Nessuna asta trovata');
         }
-      } else {
-        this.teams = [];
-        this.filteredCalciatori = [];
-        console.log('Team Manager: Nessuna asta trovata');
-      }
-    });
+      });
+    } else {
+      this.notificationsService.showError('ID asta non trovato nella URL');
+      this.router.navigate(['/home']);
+    }
 
     // Reagisci ai cambiamenti nel campo di ricerca
     this.assegnazioneForm.get('calciatoreId')?.valueChanges.subscribe(id => {
-      this.selectedCalciatore = this.asta?.calciatoriDisponibili.find(c => c.id === id) || null;
+      this.selectedCalciatore = this.filteredCalciatori.find(c => c.id === id) || null;
       
       if (this.selectedCalciatore) {
         // Imposta il prezzo di default alla quotazione attuale
@@ -83,7 +107,7 @@ export class TeamManagerComponent implements OnInit, OnDestroy {
   }
 
   private _filterCalciatori(value: string | Calciatore): Calciatore[] {
-    if (!this.asta) {
+    if (!this.filteredCalciatori.length) {
       return [];
     }
     
@@ -95,9 +119,9 @@ export class TeamManagerComponent implements OnInit, OnDestroy {
     const filterValue = typeof value === 'string' ? value.toLowerCase().trim() : '';
     
     // Applica prima il filtro per ruolo se selezionato
-    let calciatoriFiltratiPerRuolo = this.asta.calciatoriDisponibili;
+    let calciatoriFiltratiPerRuolo = this.filteredCalciatori;
     if (this.selectedRuoloFilter) {
-      calciatoriFiltratiPerRuolo = this.asta.calciatoriDisponibili.filter(
+      calciatoriFiltratiPerRuolo = this.filteredCalciatori.filter(
         calciatore => calciatore.codiceRuolo === this.selectedRuoloFilter
       );
     }
@@ -127,9 +151,10 @@ export class TeamManagerComponent implements OnInit, OnDestroy {
       this.onDeselectCalciatore();
     }
     
-    if (this.asta) {
-      this.filteredCalciatori = this.asta.calciatoriDisponibili;
-    }
+    // Ricarica i calciatori dal servizio
+    this.calciatoriService.getCalciatori().subscribe(calciatori => {
+      this.filteredCalciatori = calciatori.filter(c => !c.assegnato);
+    });
     
     // Focus sul campo di input
     setTimeout(() => {
@@ -207,7 +232,7 @@ export class TeamManagerComponent implements OnInit, OnDestroy {
     const teamNome = formValue.teamNome;
     const prezzo = formValue.prezzo;
 
-    const calciatore = this.asta?.calciatoriDisponibili.find(c => c.id === calciatoreId);
+    const calciatore = this.filteredCalciatori.find(c => c.id === calciatoreId);
     const team = this.asta?.teams.find(t => t.nome === teamNome);
 
     if (!calciatore || !team) {
@@ -228,9 +253,14 @@ export class TeamManagerComponent implements OnInit, OnDestroy {
     }
 
     // Assegna il calciatore
-    this.astaService.assegnaCalciatore(calciatore, team, prezzo).subscribe({
+    const astaId = this.asta?.id;
+    this.astaService.assegnaCalciatore(calciatore, team, prezzo, astaId).subscribe({
       next: (success) => {
         if (success) {
+          // Rimuovi il calciatore dai disponibili (filteredCalciatori)
+          this.filteredCalciatori = this.filteredCalciatori.filter(c => c.id !== calciatore.id);
+          this.initFilteredOptions();
+          
           this.notificationsService.showSuccess(`${calciatore.nome} assegnato a ${team.nome} per ${prezzo} crediti`);
           this.assegnazioneForm.reset({
             calciatoreId: '',
@@ -272,9 +302,23 @@ export class TeamManagerComponent implements OnInit, OnDestroy {
   onRemoveCalciatore(team: Team, calciatore: Calciatore): void {
     // Chiedi conferma prima di rimuovere
     if (confirm(`Sei sicuro di voler rimuovere ${calciatore.nome} dal team ${team.nome}?`)) {
-      this.astaService.rimuoviCalciatore(calciatore, team).subscribe({
+      // Passa l'ID dell'asta corrente
+      const astaId = this.asta?.id;
+      this.astaService.rimuoviCalciatore(calciatore, team, astaId).subscribe({
         next: (success) => {
           if (success) {
+            // Riaggiunge il calciatore ai disponibili
+            if (!this.filteredCalciatori.find(c => c.id === calciatore.id)) {
+              // Trova il calciatore originale dal JSON
+              this.calciatoriService.getCalciatori().subscribe(calciatori => {
+                const calciatoreOriginale = calciatori.find(c => c.id === calciatore.id);
+                if (calciatoreOriginale) {
+                  this.filteredCalciatori.push(calciatoreOriginale);
+                  this.initFilteredOptions();
+                }
+              });
+            }
+            
             this.notificationsService.showSuccess(`${calciatore.nome} rimosso dal team ${team.nome}`);
           } else {
             this.notificationsService.showError('Errore durante la rimozione del calciatore');
@@ -286,6 +330,10 @@ export class TeamManagerComponent implements OnInit, OnDestroy {
         }
       });
     }
+  }
+
+  goBack(): void {
+    this.router.navigate(['/home']);
   }
 
   ngOnDestroy(): void {

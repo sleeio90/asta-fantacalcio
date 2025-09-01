@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { Calciatore } from '../models/calciatore.model';
-import * as XLSX from 'xlsx';
+import { HttpClient } from '@angular/common/http';
 
 @Injectable({
   providedIn: 'root'
@@ -10,51 +10,24 @@ export class CalciatoriService {
   private calciatoriSubject = new BehaviorSubject<Calciatore[]>([]);
   public calciatori$ = this.calciatoriSubject.asObservable();
 
-  constructor() {}
+  constructor(private http: HttpClient) {
+    this.loadStaticData();
+  }
 
-  loadFromExcel(file: File): Promise<Calciatore[]> {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = (e: any) => {
-        try {
-          /* leggi il workbook */
-          const bstr: string = e.target.result;
-          const wb: XLSX.WorkBook = XLSX.read(bstr, { type: 'binary' });
-
-          /* prendi il primo foglio */
-          const wsname: string = wb.SheetNames[0];
-          const ws: XLSX.WorkSheet = wb.Sheets[wsname];
-
-          /* converti in JSON */
-          const data = XLSX.utils.sheet_to_json(ws);
-          console.log('Dati Excel convertiti in JSON:', data);
-          
-          // Verifica delle colonne presenti
-          if (data.length > 0) {
-            console.log('Colonne presenti nel file:', Object.keys(data[0] as object));
-          }
-          
-          const calciatori: Calciatore[] = data.map(row => new Calciatore(row));
-          console.log('Calciatori creati:', calciatori);
-          
-          // Log dettagliato del primo calciatore per debugging
-          if (calciatori.length > 0) {
-            console.log('Dettaglio primo calciatore:', {
-              id: calciatori[0].id,
-              codiceRuolo: calciatori[0].codiceRuolo,
-              nome: calciatori[0].nome,
-              squadra: calciatori[0].squadra,
-              quotazioneAttuale: calciatori[0].quotazioneAttuale
-            });
-          }
-          
-          this.calciatoriSubject.next(calciatori);
-          resolve(calciatori);
-        } catch (error) {
-          reject(error);
-        }
-      };
-      reader.readAsBinaryString(file);
+  private loadStaticData(): void {
+    this.http.get<any[]>('assets/calciatori-data.json').subscribe({
+      next: (data) => {
+        const calciatori = data.map(item => {
+          // Crea un'istanza di Calciatore con i dati dal JSON
+          const calciatore = new Calciatore(item);
+          return calciatore;
+        });
+        this.calciatoriSubject.next(calciatori);
+        console.log(`Caricati ${calciatori.length} calciatori dal file statico`);
+      },
+      error: (error) => {
+        console.error('Errore nel caricamento dei calciatori:', error);
+      }
     });
   }
 

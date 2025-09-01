@@ -1,3 +1,29 @@
+.header-section {
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  
+  .back-button {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: all 0.2s ease;
+    
+    &:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+    
+    mat-icon {
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
+    }
+  }
+}
+
 .full-width {
   width: 100%;
   margin-bottom: 15px;

@@ -13,7 +13,48 @@
   box-shadow: 0 8px 24px rgba(102, 126, 234, 0.3);
   border: none !important;
   
-  .header-content {
+  }
+
+.warning-message {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background-color: #fff3cd;
+  border: 1px solid #ffeaa7;
+  border-radius: 6px;
+  margin: 8px 0;
+  font-size: 13px;
+  color: #856404;
+  
+  mat-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+  }
+}
+
+.success-message {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background-color: #d4edda;
+  border: 1px solid #c3e6cb;
+  border-radius: 6px;
+  margin: 8px 0;
+  font-size: 13px;
+  color: #155724;
+  font-weight: 500;
+  
+  mat-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+  }
+}
+
+@media (max-width: 768px) {t {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -119,10 +160,34 @@
 
 .auction-card {
   transition: transform 0.2s ease, box-shadow 0.2s ease;
+  cursor: pointer;
+  border-radius: 12px;
+  border: 2px solid transparent;
   
   &:hover {
     transform: translateY(-2px);
     box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+  }
+  
+  &.disabled-card {
+    opacity: 0.7;
+    cursor: not-allowed;
+    background-color: #f5f5f5;
+    
+    &:hover {
+      transform: none;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+  }
+
+  &.clickable {
+    border-color: #4caf50;
+    background: linear-gradient(135deg, #ffffff 0%, #f8fffe 100%);
+    
+    &:hover {
+      border-color: #2e7d32;
+      box-shadow: 0 8px 32px rgba(76, 175, 80, 0.2);
+    }
   }
   
   mat-card-header {
@@ -188,6 +253,25 @@
     }
   }
   
+  .warning-message {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 12px;
+    padding: 8px 12px;
+    background-color: #fff3cd;
+    border: 1px solid #ffeaa7;
+    border-radius: 4px;
+    color: #856404;
+    font-size: 14px;
+    
+    mat-icon {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+    }
+  }
+  
   .participants-info {
     .participants-text {
       margin-bottom: 8px;
@@ -207,6 +291,50 @@
 .action-buttons {
   display: flex;
   gap: 8px;
+  align-items: center;
+  
+  .load-players-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 500;
+    
+    mat-icon {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+    }
+  }
+}
+
+.warning-message {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+  padding: 8px 12px;
+  background-color: #fff3cd;
+  border: 1px solid #ffeaa7;
+  border-radius: 4px;
+  color: #856404;
+  font-size: 14px;
+  
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+}
+
+.disabled-card {
+  opacity: 0.7;
+  cursor: not-allowed !important;
+  background-color: #f5f5f5;
+  
+  &:hover {
+    transform: none !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1) !important;
+  }
 }
 
 // Responsive

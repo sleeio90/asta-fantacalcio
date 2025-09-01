@@ -78,7 +78,7 @@
         </mat-tab>
         
         <mat-tab *ngFor="let team of teams" [label]="team.nome">
-          <app-team-detail [teamNome]="team.nome"></app-team-detail>
+          <app-team-detail [teamNome]="team.nome" [asta]="asta"></app-team-detail>
         </mat-tab>
       </mat-tab-group>
     </mat-card-content>

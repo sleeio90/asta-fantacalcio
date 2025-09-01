@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { CanActivate, ActivatedRouteSnapshot, RouterStateSnapshot, Router } from '@angular/router';
-import { Observable, of } from 'rxjs';
-import { map, take } from 'rxjs/operators';
+import { Observable, combineLatest } from 'rxjs';
+import { map, filter, take } from 'rxjs/operators';
 import { AuthService } from '../services/auth.service';
 
 @Injectable({
@@ -17,11 +17,17 @@ export class AuthGuard implements CanActivate {
     route: ActivatedRouteSnapshot,
     state: RouterStateSnapshot
   ): Observable<boolean> {
-    return this.authService.user$.pipe(
+    // Aspetta che l'autenticazione si risolva completamente
+    return combineLatest([
+      this.authService.user$,
+      this.authService.authLoading$
+    ]).pipe(
+      filter(([user, loading]) => !loading), // Aspetta che il loading sia completato
       take(1),
-      map(user => {
+      map(([user, loading]) => {
         if (!user) {
-          // User not authenticated
+          // User not authenticated, salva l'URL corrente per il redirect dopo login
+          localStorage.setItem('redirectUrl', state.url);
           this.router.navigate(['/login']);
           return false;
         }
@@ -50,9 +56,13 @@ export class AdminGuard implements CanActivate {
   ) {}
 
   canActivate(): Observable<boolean> {
-    return this.authService.user$.pipe(
+    return combineLatest([
+      this.authService.user$,
+      this.authService.authLoading$
+    ]).pipe(
+      filter(([user, loading]) => !loading),
       take(1),
-      map(user => {
+      map(([user, loading]) => {
         if (!user) {
           this.router.navigate(['/login']);
           return false;
@@ -79,10 +89,22 @@ export class LoginGuard implements CanActivate {
   ) {}
 
   canActivate(): Observable<boolean> {
-    return this.authService.user$.pipe(
+    return combineLatest([
+      this.authService.user$,
+      this.authService.authLoading$
+    ]).pipe(
+      filter(([user, loading]) => !loading),
       take(1),
-      map(user => {
+      map(([user, loading]) => {
         if (user) {
+          // Controlla se c'è un URL di redirect salvato
+          const redirectUrl = localStorage.getItem('redirectUrl');
+          if (redirectUrl) {
+            localStorage.removeItem('redirectUrl');
+            this.router.navigate([redirectUrl]);
+            return false;
+          }
+
           // User is already logged in, redirect based on role
           if (user.role === 'admin') {
             this.router.navigate(['/home']);

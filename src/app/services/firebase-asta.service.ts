@@ -32,20 +32,27 @@ export class FirebaseAstaService {
   }
 
   private reconstructAstaFromFirebase(data: any): Asta {
+    console.log('Ricostruzione asta da Firebase:', data);
+    
     // Ricostruisci i teams
-    const teams = Object.keys(data.teams || {}).map(key => {
+    const teams: Team[] = Object.keys(data.teams || {}).map(key => {
       const teamData = data.teams[key];
-      const team = new Team(teamData.nome, teamData.budgetIniziale, teamData.userId);
+      console.log('Ricostruzione team da Firebase:', key, teamData);
+      
+      const team = new Team(teamData.nome, teamData.budgetIniziale || 500);
       team.budget = teamData.budget;
       
+      // Copia dati aggiuntivi del team
+      if (teamData.userId) (team as any).userId = teamData.userId;
+      if (teamData.userEmail) (team as any).userEmail = teamData.userEmail;
+
       // Ricostruisci i calciatori del team
       if (teamData.calciatori) {
         Object.keys(teamData.calciatori).forEach(calcKey => {
           const calcData = teamData.calciatori[calcKey];
-          console.log('Ricostruzione calciatore team da Firebase:', calcKey, calcData);
+          console.log('Ricostruzione calciatore del team:', calcKey, calcData);
           
-          // Verifica che i dati essenziali ci siano
-          if (calcData.nome && calcData.id && calcData.codiceRuolo) {
+          if (calcData && calcData.nome && calcData.id && calcData.codiceRuolo) {
             const calciatore = new Calciatore(calcData);
             team.addCalciatore(calciatore, calcData.prezzoAcquisto || 0);
           } else {
@@ -57,21 +64,9 @@ export class FirebaseAstaService {
       return team;
     });
 
-    // Ricostruisci l'array di tutti i calciatori
-    const calciatori: Calciatore[] = Object.keys(data.calciatori || {})
-      .map(key => {
-        const calcData = data.calciatori[key];
-        console.log('Ricostruzione calciatore da Firebase:', key, calcData);
-        
-        // Verifica che i dati essenziali ci siano
-        if (!calcData.nome || !calcData.id || !calcData.codiceRuolo) {
-          console.warn('Calciatore con dati incompleti ignorato:', calcData);
-          return null;
-        }
-        
-        return new Calciatore(calcData);
-      })
-      .filter((calc): calc is Calciatore => calc !== null); // Type guard per rimuovere i null
+    // Non carichiamo più i calciatori da Firebase - verranno caricati dal JSON statico
+    // I calciatori assegnati sono già nei team
+    const calciatori: Calciatore[] = [];
 
     const asta = new Asta(
       data.nome, 
@@ -85,7 +80,6 @@ export class FirebaseAstaService {
     // Ripristina i dati aggiuntivi
     if (data.id) asta.id = data.id;
     if (data.codiceInvito) asta.codiceInvito = data.codiceInvito;
-    // Usa il conteggio salvato su Firebase invece di quello calcolato dal costruttore
     if (data.partecipantiIscritti !== undefined) asta.partecipantiIscritti = data.partecipantiIscritti;
     if (data.isAttiva !== undefined) asta.isAttiva = data.isAttiva;
     if (data.createdAt) asta.createdAt = new Date(data.createdAt);
@@ -152,32 +146,192 @@ export class FirebaseAstaService {
     return this.astaSubject.value;
   }
 
-  assegnaCalciatore(calciatore: Calciatore, team: Team, prezzo: number): Promise<boolean> {
-    const asta = this.astaSubject.value;
-    if (!asta) {
-      return Promise.resolve(false);
+  assegnaCalciatore(calciatore: Calciatore, team: Team, prezzo: number, astaId?: string): Promise<boolean> {
+    if (astaId) {
+      // Carica l'asta specifica e poi procedi con l'assegnazione
+      return new Promise((resolve) => {
+        this.getAstaById(astaId).pipe(take(1)).subscribe(asta => {
+          if (!asta) {
+            console.log('Asta specifica non trovata:', astaId);
+            resolve(false);
+            return;
+          }
+          this._assegnaCalciatoreToAsta(calciatore, team, prezzo, asta).then(resolve);
+        });
+      });
+    } else {
+      // Usa l'asta corrente
+      const asta = this.astaSubject.value;
+      if (!asta) {
+        return Promise.resolve(false);
+      }
+      return this._assegnaCalciatoreToAsta(calciatore, team, prezzo, asta);
     }
-
-    const success = asta.assegnaCalciatore(calciatore, team, prezzo);
-    if (success) {
-      // Aggiorna Firebase
-      return this.updateAstaInFirebase(asta).then(() => true);
-    }
-    return Promise.resolve(false);
   }
 
-  rimuoviAssegnazione(calciatore: Calciatore): Promise<boolean> {
-    const asta = this.astaSubject.value;
-    if (!asta) {
+  private _assegnaCalciatoreToAsta(calciatore: Calciatore, team: Team, prezzo: number, asta: Asta): Promise<boolean> {
+    if (!asta.id) {
       return Promise.resolve(false);
     }
 
-    const success = asta.rimuoviAssegnazione(calciatore);
-    if (success) {
-      // Aggiorna Firebase
-      return this.updateAstaInFirebase(asta).then(() => true);
+    // Trova il team nell'asta
+    const targetTeam = asta.teams.find(t => t.nome === team.nome);
+    if (!targetTeam) {
+      return Promise.resolve(false);
     }
-    return Promise.resolve(false);
+
+    // Controlla se il team ha raggiunto il limite per il ruolo
+    if (targetTeam.haRaggiuntolLimite(calciatore.codiceRuolo)) {
+      return Promise.resolve(false);
+    }
+
+    // Controlla se il team ha abbastanza budget
+    if (targetTeam.budget < prezzo) {
+      return Promise.resolve(false);
+    }
+
+    // Crea una copia del calciatore per l'assegnazione
+    const calciatoreAssegnato = new Calciatore({
+      id: calciatore.id,
+      nome: calciatore.nome,
+      squadra: calciatore.squadra,
+      codiceRuolo: calciatore.codiceRuolo,
+      ruolo: calciatore.ruolo,
+      quotazioneAttuale: calciatore.quotazioneAttuale,
+      quotazioneIniziale: calciatore.quotazioneIniziale,
+      assegnato: true,
+      teamAssegnato: team.nome,
+      prezzoAcquisto: prezzo
+    });
+
+    // Aggiunge il calciatore al team e aggiorna il budget
+    targetTeam.addCalciatore(calciatoreAssegnato, prezzo);
+
+    // Salva su Firebase - aggiorna solo il team specifico
+    const updates: any = {};
+    const teamIndex = asta.teams.findIndex(t => t.nome === team.nome);
+    
+    updates[`/aste/${asta.id}/teams/team_${teamIndex}/budget`] = targetTeam.budget;
+    updates[`/aste/${asta.id}/teams/team_${teamIndex}/calciatori/calc_${calciatore.id}`] = {
+      id: calciatoreAssegnato.id,
+      nome: calciatoreAssegnato.nome,
+      squadra: calciatoreAssegnato.squadra,
+      codiceRuolo: calciatoreAssegnato.codiceRuolo,
+      ruolo: calciatoreAssegnato.ruolo,
+      quotazioneAttuale: calciatoreAssegnato.quotazioneAttuale,
+      quotazioneIniziale: calciatoreAssegnato.quotazioneIniziale,
+      assegnato: true,
+      teamAssegnato: team.nome,
+      prezzoAcquisto: prezzo
+    };
+
+    return this.db.object('/').update(updates).then(() => {
+      // Aggiorna il subject locale solo se è la stessa asta
+      if (this.astaSubject.value && this.astaSubject.value.id === asta.id) {
+        this.astaSubject.next(asta);
+      }
+      return true;
+    }).catch(error => {
+      console.error('Errore durante l\'assegnazione:', error);
+      return false;
+    });
+  }
+
+  rimuoviAssegnazione(calciatore: Calciatore, astaId?: string): Promise<boolean> {
+    console.log('rimuoviAssegnazione chiamato per calciatore:', calciatore, 'astaId:', astaId);
+    
+    if (astaId) {
+      // Carica l'asta specifica e poi procedi con la rimozione
+      return new Promise((resolve) => {
+        this.getAstaById(astaId).pipe(take(1)).subscribe(asta => {
+          if (!asta) {
+            console.log('Asta specifica non trovata:', astaId);
+            resolve(false);
+            return;
+          }
+          this._rimuoviAssegnazioneFromAsta(calciatore, asta).then(resolve);
+        });
+      });
+    } else {
+      // Usa l'asta corrente
+      const asta = this.astaSubject.value;
+      if (!asta) {
+        console.log('Nessuna asta corrente trovata');
+        return Promise.resolve(false);
+      }
+      return this._rimuoviAssegnazioneFromAsta(calciatore, asta);
+    }
+  }
+
+  private _rimuoviAssegnazioneFromAsta(calciatore: Calciatore, asta: Asta): Promise<boolean> {
+    console.log('_rimuoviAssegnazioneFromAsta per asta:', asta.id, 'calciatore:', calciatore.nome);
+
+    if (!asta.id) {
+      console.log('ID asta mancante');
+      return Promise.resolve(false);
+    }
+
+    console.log('Teams nell\'asta:', asta.teams.map(t => ({ nome: t.nome, calciatori: t.calciatori.length })));
+
+    // Trova il team che ha questo calciatore
+    const targetTeam = asta.teams.find(t => {
+      const found = t.calciatori.some(c => c.id === calciatore.id);
+      console.log(`Team ${t.nome}: ha calciatore ${calciatore.nome}? ${found}`);
+      return found;
+    });
+    
+    if (!targetTeam) {
+      console.log('Team non trovato per il calciatore:', calciatore.nome);
+      console.log('Calciatori disponibili negli teams:');
+      asta.teams.forEach(team => {
+        console.log(`${team.nome}:`, team.calciatori.map(c => `${c.nome}(${c.id})`));
+      });
+      return Promise.resolve(false);
+    }
+
+    console.log('Team trovato:', targetTeam.nome);
+
+    // Trova il calciatore nel team
+    const calciatoreIndex = targetTeam.calciatori.findIndex(c => c.id === calciatore.id);
+    if (calciatoreIndex === -1) {
+      console.log('Calciatore non trovato nel team');
+      return Promise.resolve(false);
+    }
+
+    const calciatoreAssegnato = targetTeam.calciatori[calciatoreIndex];
+    console.log('Calciatore da rimuovere trovato:', calciatoreAssegnato.nome, 'prezzo:', calciatoreAssegnato.prezzoAcquisto);
+    
+    // Rimuove il calciatore dal team e ripristina il budget
+    const budgetPrima = targetTeam.budget;
+    const rimossoConSuccesso = targetTeam.removeCalciatore(calciatoreAssegnato);
+    console.log('Rimozione dal team:', rimossoConSuccesso, 'Budget prima:', budgetPrima, 'Budget dopo:', targetTeam.budget);
+
+    if (!rimossoConSuccesso) {
+      console.log('Errore nella rimozione dal team');
+      return Promise.resolve(false);
+    }
+
+    // Aggiorna Firebase - rimuove il calciatore dal team
+    const updates: any = {};
+    const teamIndex = asta.teams.findIndex(t => t.nome === targetTeam.nome);
+    console.log('Aggiornamento Firebase per team index:', teamIndex);
+    
+    updates[`/aste/${asta.id}/teams/team_${teamIndex}/budget`] = targetTeam.budget;
+    updates[`/aste/${asta.id}/teams/team_${teamIndex}/calciatori/calc_${calciatore.id}`] = null; // Rimuove il nodo
+    
+    console.log('Updates da inviare a Firebase:', updates);
+
+    return this.db.object('/').update(updates).then(() => {
+      console.log('Aggiornamento Firebase completato con successo');
+      // Aggiorna il subject locale solo se è la stessa asta
+      if (this.astaSubject.value && this.astaSubject.value.id === asta.id) {
+        this.astaSubject.next(asta);
+      }
+      return true;
+    }).catch(error => {
+      console.error('Errore durante la rimozione:', error);
+      return false;
+    });
   }
 
   private updateAstaInFirebase(asta: Asta): Promise<void> {
@@ -285,11 +439,11 @@ export class FirebaseAstaService {
 
   // Nuovo metodo per creare un'asta con le nuove proprietà
   createNewAsta(nome: string, numeroPartecipanti: number, creditiPerPartecipante: number, amministratore: string, calciatori: Calciatore[]): Promise<Asta> {
-    const asta = new Asta(nome, numeroPartecipanti, creditiPerPartecipante, amministratore, [], calciatori);
+    const asta = new Asta(nome, numeroPartecipanti, creditiPerPartecipante, amministratore, [], []); // Teams e calciatori vuoti
     const astaId = this.db.createPushId();
     asta.id = astaId;
     
-    // Converte l'asta in un formato adatto a Firebase
+    // Converte l'asta in un formato adatto a Firebase - senza calciatori globali
     const astaData: any = {
       id: asta.id,
       nome: asta.nome,
@@ -300,25 +454,9 @@ export class FirebaseAstaService {
       partecipantiIscritti: 1, // L'amministratore è sempre il primo partecipante
       isAttiva: asta.isAttiva,
       createdAt: asta.createdAt.toISOString(),
-      teams: {},
-      calciatori: {}
+      teams: {}
+      // Nota: Non salviamo più la lista completa dei calciatori
     };
-
-    // Converte i calciatori
-    calciatori.forEach((calc) => {
-      astaData.calciatori[`calc_${calc.id}`] = {
-        id: calc.id,
-        nome: calc.nome,
-        squadra: calc.squadra,
-        codiceRuolo: calc.codiceRuolo,
-        ruolo: calc.ruolo,
-        quotazioneAttuale: calc.quotazioneAttuale,
-        quotazioneIniziale: calc.quotazioneIniziale,
-        assegnato: calc.assegnato,
-        teamAssegnato: calc.teamAssegnato,
-        prezzoAcquisto: calc.prezzoAcquisto
-      };
-    });
 
     return this.db.object(`/aste/${astaId}`).set(astaData).then(() => {
       return asta;
@@ -386,6 +524,23 @@ export class FirebaseAstaService {
       map((aste: any[]) => {
         if (aste.length === 0) return null;
         return this.reconstructAstaFromFirebase(aste[0]);
+      })
+    );
+  }
+
+  // Metodo per ottenere un'asta tramite ID
+  getAstaById(astaId: string): Observable<Asta | null> {
+    console.log('getAstaById chiamato per ID:', astaId);
+    return this.db.object(`/aste/${astaId}`).valueChanges().pipe(
+      map((astaData: any) => {
+        console.log('Dati asta ricevuti da Firebase per ID', astaId, ':', astaData);
+        if (!astaData) {
+          console.log('Nessun dato trovato per asta ID:', astaId);
+          return null;
+        }
+        const asta = this.reconstructAstaFromFirebase(astaData);
+        console.log('Asta ricostruita:', asta);
+        return asta;
       })
     );
   }

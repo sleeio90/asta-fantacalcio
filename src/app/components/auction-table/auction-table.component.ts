@@ -1,12 +1,13 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { AstaService } from '../../services/asta.service';
+import { AuthService, UserProfile } from '../../services/auth.service';
 import { NotificationsService } from '../../services/notifications.service';
 import { Asta } from '../../models/asta.model';
 import { Team } from '../../models/team.model';
 import { Calciatore } from '../../models/calciatore.model';
 import { Subscription } from 'rxjs';
-import { distinctUntilChanged } from 'rxjs/operators';
+import { distinctUntilChanged, take } from 'rxjs/operators';
 
 @Component({
   selector: 'app-auction-table',
@@ -22,6 +23,7 @@ export class AuctionTableComponent implements OnInit, OnDestroy {
 
   constructor(
     private astaService: AstaService,
+    private authService: AuthService,
     private notificationsService: NotificationsService,
     private router: Router,
     private route: ActivatedRoute
@@ -45,10 +47,57 @@ export class AuctionTableComponent implements OnInit, OnDestroy {
   }
 
   private loadSpecificAuction(astaId: string): void {
-    // Prima imposta l'asta come corrente, poi caricala
-    this.astaService.setCurrentAsta(astaId).subscribe({
-      next: () => {
-        this.loadCurrentAuction();
+    // Carica direttamente l'asta specifica senza usare setCurrentAsta
+    console.log('Loading auction directly with ID:', astaId);
+    
+    this.astaSubscription = this.astaService.getAstaById(astaId).subscribe({
+      next: (asta) => {
+        console.log('Auction table received specific asta:', asta);
+        
+        if (asta) {
+          // Verifica se l'utente ha i permessi per accedere a questa asta
+          this.authService.user$.pipe(take(1)).subscribe((user: UserProfile | null) => {
+            if (!user) {
+              console.log('Utente non autenticato');
+              this.router.navigate(['/login']);
+              return;
+            }
+
+            // Controlla se l'utente è admin o partecipa all'asta
+            const isAdmin = user.role === 'admin';
+            const isParticipant = asta.teams.some(team => (team as any).userId === user.uid);
+            
+            console.log('Controllo permessi:', {
+              userId: user.uid,
+              userRole: user.role,
+              isAdmin,
+              isParticipant,
+              astaAdmin: asta.amministratore,
+              teams: asta.teams.map(t => ({ nome: t.nome, userId: (t as any).userId }))
+            });
+            
+            if (!isAdmin && !isParticipant) {
+              console.log('Utente non autorizzato per questa asta');
+              this.notificationsService.showWarning('Non sei autorizzato ad accedere a questa asta');
+              this.router.navigate(['/home']);
+              return;
+            }
+
+            // L'utente ha i permessi, mostra l'asta
+            this.asta = asta;
+            this.teams = asta.teams;
+            console.log('Loaded teams for specific asta:', this.teams.length);
+            
+            // Log dei calciatori per debug
+            this.teams.forEach(team => {
+              console.log(`Team ${team.nome} ha ${team.calciatori.length} calciatori:`, team.calciatori.map(c => c.nome));
+            });
+          });
+        } else {
+          console.log('Asta non trovata per ID:', astaId);
+          this.notificationsService.showWarning('Asta non trovata');
+          this.router.navigate(['/home']);
+        }
       },
       error: (error) => {
         console.error('Errore nel caricare l\'asta specifica:', error);

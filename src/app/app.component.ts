@@ -11,12 +11,14 @@ import { Observable } from 'rxjs';
 export class AppComponent implements OnInit {
   title = 'asta-fantacalcio';
   user$: Observable<UserProfile | null>;
+  authLoading$: Observable<boolean>;
   
   constructor(
     private authService: AuthService,
     private router: Router
   ) {
     this.user$ = this.authService.user$;
+    this.authLoading$ = this.authService.authLoading$;
   }
 
   ngOnInit(): void {
