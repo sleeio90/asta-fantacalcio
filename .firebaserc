@@ -1,0 +1,11 @@
+# Firebase
+.firebase/
+firebase-debug.log
+.firebaserc
+
+# Build
+dist/
+*.log
+
+# Dependencies
+node_modules/
