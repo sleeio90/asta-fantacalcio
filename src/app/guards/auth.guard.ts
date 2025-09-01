@@ -35,8 +35,8 @@ export class AuthGuard implements CanActivate {
         // Check if route requires admin role
         const requiredRole = route.data['role'] as string;
         if (requiredRole && requiredRole === 'admin' && user.role !== 'admin') {
-          // User is not admin, redirect to auction table (player view)
-          this.router.navigate(['/auction-table']);
+          // User is not admin, redirect to home
+          this.router.navigate(['/home']);
           return false;
         }
 
@@ -69,7 +69,7 @@ export class AdminGuard implements CanActivate {
         }
 
         if (user.role !== 'admin') {
-          this.router.navigate(['/auction-table']);
+          this.router.navigate(['/home']);
           return false;
         }
 
@@ -105,12 +105,8 @@ export class LoginGuard implements CanActivate {
             return false;
           }
 
-          // User is already logged in, redirect based on role
-          if (user.role === 'admin') {
-            this.router.navigate(['/home']);
-          } else {
-            this.router.navigate(['/auction-table']);
-          }
+          // User is already logged in, redirect to home for everyone
+          this.router.navigate(['/home']);
           return false;
         }
         return true;

@@ -37,7 +37,7 @@ export class LoginComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    // Check if user is already logged in
+    // Check if user is already logged in - sempre redirect alla home
     this.authService.user$.subscribe(user => {
       if (user) {
         this.router.navigate(['/home']);
@@ -68,14 +68,10 @@ export class LoginComponent implements OnInit {
         localStorage.removeItem('redirectUrl');
         this.router.navigate([redirectUrl]);
       } else {
-        // Redirect normale basato sul ruolo
+        // Redirect normale basato sul ruolo - tutti i giocatori vanno alla home
         this.authService.user$.subscribe(user => {
           if (user) {
-            if (user.role === 'admin') {
-              this.router.navigate(['/home']);
-            } else {
-              this.router.navigate(['/auction-table']);
-            }
+            this.router.navigate(['/home']);
           }
         });
       }
