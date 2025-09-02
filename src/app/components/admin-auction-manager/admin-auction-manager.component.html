@@ -111,6 +111,15 @@
 
         <mat-card-actions>
           <div class="action-buttons">
+            <!-- Download CSV (solo per aste complete) -->
+            <button mat-icon-button 
+                    *ngIf="auction.partecipantiIscritti >= auction.numeroPartecipanti"
+                    matTooltip="Scarica CSV rose complete" 
+                    color="primary"
+                    (click)="onDownloadCSV(auction); $event.stopPropagation()">
+              <mat-icon>download</mat-icon>
+            </button>
+
             <!-- Azioni Stato -->
             <button mat-icon-button 
                     [matTooltip]="auction.isAttiva ? 'Disattiva asta' : 'Attiva asta'"

@@ -157,4 +157,9 @@ export class AstaService {
       });
     });
   }
+
+  // Metodo per scaricare il CSV delle rose complete
+  async downloadRostersCSV(astaId: string, astaName: string): Promise<void> {
+    return this.firebaseService.downloadRostersCSV(astaId, astaName);
+  }
 }

@@ -52,15 +52,33 @@ export class AuctionJoinerComponent implements OnInit {
           if (response.success) {
             this.notificationsService.showSuccess(response.message);
             this.auctionJoined.emit(true);
+            // Reset del form sia in caso di successo che errore
             this.joinForm.reset();
+            // Reset esplicito dei valori per essere sicuri
+            this.joinForm.patchValue({
+              codiceInvito: '',
+              nomeTeam: ''
+            });
           } else {
             this.notificationsService.showError(response.message);
+            // Reset anche in caso di errore per permettere nuovo tentativo
+            this.joinForm.reset();
+            this.joinForm.patchValue({
+              codiceInvito: '',
+              nomeTeam: ''
+            });
           }
         },
         error: (error) => {
           this.isLoading = false;
           this.notificationsService.showError('Errore durante l\'iscrizione all\'asta');
           console.error('Errore join asta:', error);
+          // Reset anche in caso di errore di rete
+          this.joinForm.reset();
+          this.joinForm.patchValue({
+            codiceInvito: '',
+            nomeTeam: ''
+          });
         }
       });
     }

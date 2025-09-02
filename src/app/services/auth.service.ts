@@ -3,6 +3,8 @@ import { AngularFireAuth } from '@angular/fire/compat/auth';
 import { AngularFireDatabase } from '@angular/fire/compat/database';
 import { Observable, BehaviorSubject, of } from 'rxjs';
 import { switchMap, map, take } from 'rxjs/operators';
+import firebase from 'firebase/compat/app';
+import 'firebase/compat/auth';
 
 export interface UserProfile {
   uid: string;
@@ -180,6 +182,38 @@ export class AuthService {
     } catch (error) {
       console.error('Password reset error:', error);
       throw error;
+    }
+  }
+
+  // Delete user account
+  async deleteAccount(): Promise<void> {
+    try {
+      const user = await this.afAuth.currentUser;
+      if (!user) {
+        throw new Error('Nessun utente autenticato');
+      }
+
+      const uid = user.uid;
+
+      // Prima elimina il profilo utente dal database
+      await this.db.object(`users/${uid}`).remove();
+
+      // Poi elimina l'account Firebase Auth
+      await user.delete();
+
+      // Reset dello stato locale
+      this.userSubject.next(null);
+      
+      console.log('Account eliminato con successo');
+    } catch (error: any) {
+      console.error('Errore durante l\'eliminazione dell\'account:', error);
+      
+      // Gestione errori specifici
+      if (error.code === 'auth/requires-recent-login') {
+        throw new Error('REAUTH_REQUIRED');
+      } else {
+        throw new Error(error.message || 'Errore durante l\'eliminazione dell\'account');
+      }
     }
   }
 }

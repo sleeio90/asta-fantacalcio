@@ -35,39 +35,40 @@ export class FirebaseAstaService {
     console.log('Ricostruzione asta da Firebase:', data);
     
     // Ricostruisci i teams
-    const teams: Team[] = Object.keys(data.teams || {}).map(key => {
-      const teamData = data.teams[key];
-      console.log('Ricostruzione team da Firebase:', key, teamData);
-      
-      const team = new Team(teamData.nome, teamData.budgetIniziale || 500);
-      team.budget = teamData.budget;
-      
-      // Copia dati aggiuntivi del team
-      if (teamData.userId) (team as any).userId = teamData.userId;
-      if (teamData.userEmail) (team as any).userEmail = teamData.userEmail;
+    const teams: Team[] = Object.keys(data.teams || {})
+      .map(key => {
+        const teamData = data.teams[key];
+        console.log('Ricostruzione team da Firebase:', key, teamData);
+        
+        const team = new Team(teamData.nome, teamData.budgetIniziale || 500);
+        team.budget = teamData.budget;
+        
+        // Copia dati aggiuntivi del team
+        if (teamData.userId) (team as any).userId = teamData.userId;
+        if (teamData.userEmail) (team as any).userEmail = teamData.userEmail;
 
-      // Ricostruisci i calciatori del team
-      if (teamData.calciatori) {
-        Object.keys(teamData.calciatori).forEach(calcKey => {
-          const calcData = teamData.calciatori[calcKey];
-          console.log('Ricostruzione calciatore del team:', calcKey, calcData);
-          
-          if (calcData && calcData.nome && calcData.id && calcData.codiceRuolo) {
-            const calciatore = new Calciatore(calcData);
-            // Non usare addCalciatore perché il budget è già quello aggiornato da Firebase
-            // Aggiungi direttamente il calciatore alla lista senza modificare il budget
-            calciatore.assegnato = true;
-            calciatore.teamAssegnato = team.nome;
-            calciatore.prezzoAcquisto = calcData.prezzoAcquisto || 0;
-            team.calciatori.push(calciatore);
-          } else {
-            console.warn('Calciatore team con dati incompleti ignorato:', calcData);
-          }
-        });
-      }
-      
-      return team;
-    });
+        // Ricostruisci i calciatori del team
+        if (teamData.calciatori) {
+          Object.keys(teamData.calciatori).forEach(calcKey => {
+            const calcData = teamData.calciatori[calcKey];
+            console.log('Ricostruzione calciatore del team:', calcKey, calcData);
+            
+            if (calcData && calcData.nome && calcData.id && calcData.codiceRuolo) {
+              const calciatore = new Calciatore(calcData);
+              // Non usare addCalciatore perché il budget è già quello aggiornato da Firebase
+              // Aggiungi direttamente il calciatore alla lista senza modificare il budget
+              calciatore.assegnato = true;
+              calciatore.teamAssegnato = team.nome;
+              calciatore.prezzoAcquisto = calcData.prezzoAcquisto || 0;
+              team.calciatori.push(calciatore);
+            } else {
+              console.warn('Calciatore team con dati incompleti ignorato:', calcData);
+            }
+          });
+        }
+        
+        return team;
+      });
 
     // Non carichiamo più i calciatori da Firebase - verranno caricati dal JSON statico
     // I calciatori assegnati sono già nei team
@@ -565,8 +566,19 @@ export class FirebaseAstaService {
     return this.db.list('/aste').valueChanges().pipe(
       map((aste: any[]) => {
         return aste.map(astaData => this.reconstructAstaFromFirebase(astaData))
-                   .filter(asta => asta.amministratore === userId || 
-                                  asta.teams.some(team => (team as any).userId === userId));
+                   .filter(asta => {
+                     // Controlla se è admin dell'asta
+                     if (asta.amministratore === userId) {
+                       return true;
+                     }
+                     
+                     // Per i giocatori, controlla se hanno un team E non sono nella blacklist
+                     const hasTeam = asta.teams.some(team => (team as any).userId === userId);
+                     if (!hasTeam) {
+                       return false;
+                     }
+                     return true;
+                   });
       })
     );
   }
@@ -782,5 +794,79 @@ export class FirebaseAstaService {
         });
       });
     });
+  }
+
+  // Metodo per generare il CSV delle rose complete
+  generateRostersCSV(astaId: string): Promise<string> {
+    return new Promise((resolve, reject) => {
+      this.db.object(`/aste/${astaId}`).valueChanges().pipe(take(1)).subscribe(data => {
+        if (!data) {
+          reject(new Error('Asta non trovata'));
+          return;
+        }
+
+        const asta = data as any;
+        console.log('Generazione CSV per asta:', asta.nome);
+
+        let csvContent = '';
+        
+        // Aggiungi una riga di separazione iniziale
+        csvContent += '$,$,$\n';
+
+        // Per ogni team
+        if (asta.teams) {
+          const teamKeys = Object.keys(asta.teams).sort(); // Ordina per avere un output consistente
+          
+          teamKeys.forEach((teamKey, teamIndex) => {
+            const team = asta.teams[teamKey];
+            
+            // Aggiungi i calciatori del team
+            if (team.calciatori) {
+              Object.keys(team.calciatori).forEach(calcKey => {
+                const calciatore = team.calciatori[calcKey];
+                if (calciatore.assegnato) {
+                  // Formato: Nome Squadra, ID Calciatore, Prezzo
+                  csvContent += `${team.nome},${calciatore.id},${calciatore.prezzoAcquisto || 0}\n`;
+                }
+              });
+            }
+            
+            // Aggiungi separatore tra team (tranne dopo l'ultimo)
+            if (teamIndex < teamKeys.length - 1) {
+              csvContent += '$,$,$\n';
+            }
+          });
+        }
+
+        resolve(csvContent);
+      });
+    });
+  }
+
+  // Metodo per scaricare il CSV
+  async downloadRostersCSV(astaId: string, astaName: string): Promise<void> {
+    try {
+      const csvContent = await this.generateRostersCSV(astaId);
+      
+      // Crea un blob con il contenuto CSV
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      
+      // Crea un link per il download
+      const link = document.createElement('a');
+      if (link.download !== undefined) {
+        const url = URL.createObjectURL(blob);
+        link.setAttribute('href', url);
+        link.setAttribute('download', `fanta-asta-${astaName.replace(/[^a-zA-Z0-9]/g, '-')}-rosters-${Date.now()}.csv`);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        console.log('Download CSV avviato per asta:', astaName);
+      }
+    } catch (error) {
+      console.error('Errore durante il download del CSV:', error);
+      throw error;
+    }
   }
 }

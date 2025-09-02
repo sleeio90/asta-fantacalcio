@@ -18,17 +18,29 @@
           Home
         </button>
         
-        <!-- User info and logout -->
-        <span class="user-info">
+        <!-- User info with dropdown menu -->
+        <button mat-button [matMenuTriggerFor]="desktopUserMenu" class="user-info-button">
           <mat-icon>person</mat-icon>
           {{ user.displayName || user.email }}
           <span class="user-role" [class.admin-role]="user.role === 'admin'">
             ({{ user.role === 'admin' ? 'Admin' : 'Giocatore' }})
           </span>
-        </span>
-        <button mat-icon-button (click)="logout()" title="Logout">
-          <mat-icon>logout</mat-icon>
+          <mat-icon class="dropdown-arrow">arrow_drop_down</mat-icon>
         </button>
+        
+        <mat-menu #desktopUserMenu="matMenu">
+          <button mat-menu-item 
+                  (click)="deleteAccount()"
+                  style="color: #d32f2f;">
+            <mat-icon style="color: #d32f2f;">delete_forever</mat-icon>
+            <span style="color: #d32f2f;">Elimina Account</span>
+          </button>
+          <mat-divider></mat-divider>
+          <button mat-menu-item (click)="logout()">
+            <mat-icon>logout</mat-icon>
+            Logout
+          </button>
+        </mat-menu>
       </div>
       
       <!-- Mobile Menu -->
@@ -40,7 +52,7 @@
           <mat-icon>more_vert</mat-icon>
         </button>
         <mat-menu #mobileMenu="matMenu">
-          <div class="mobile-user-info">
+          <button mat-menu-item disabled class="user-info-item">
             <mat-icon>person</mat-icon>
             <div class="user-details">
               <div class="user-name">{{ user.displayName || user.email }}</div>
@@ -48,8 +60,14 @@
                 {{ user.role === 'admin' ? 'Amministratore' : 'Giocatore' }}
               </div>
             </div>
-          </div>
+          </button>
           <mat-divider></mat-divider>
+          <button mat-menu-item 
+                  (click)="deleteAccount()"
+                  style="color: #d32f2f;">
+            <mat-icon style="color: #d32f2f;">delete_forever</mat-icon>
+            <span style="color: #d32f2f;">Elimina Account</span>
+          </button>
           <button mat-menu-item (click)="logout()">
             <mat-icon>logout</mat-icon>
             Logout

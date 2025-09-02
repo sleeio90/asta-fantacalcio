@@ -11,7 +11,7 @@ import { AngularFireAuthModule } from '@angular/fire/compat/auth';
 import { environment } from '../environments/environment';
 
 import { AppRoutingModule } from './app-routing.module';
-import { AppComponent } from './app.component';
+import { AppComponent, ConfirmDeleteDialogComponent } from './app.component';
 import { HomeComponent } from './components/home/home.component';
 import { LoginComponent } from './components/login/login.component';
 import { CalciatoriTableComponent } from './components/calciatori-table/calciatori-table.component';
@@ -51,6 +51,7 @@ import { ClipboardModule } from '@angular/cdk/clipboard';
 @NgModule({
   declarations: [
     AppComponent,
+    ConfirmDeleteDialogComponent,
     HomeComponent,
     LoginComponent,
     CalciatoriTableComponent,

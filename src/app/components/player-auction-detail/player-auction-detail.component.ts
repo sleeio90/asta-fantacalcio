@@ -5,7 +5,7 @@ import { AuthService, UserProfile } from '../../services/auth.service';
 import { Asta } from '../../models/asta.model';
 import { Team } from '../../models/team.model';
 import { Observable, of, combineLatest } from 'rxjs';
-import { map, switchMap } from 'rxjs/operators';
+import { map, switchMap, take } from 'rxjs/operators';
 import { AngularFireDatabase } from '@angular/fire/compat/database';
 
 @Component({

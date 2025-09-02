@@ -122,4 +122,20 @@ export class AdminAuctionManagerComponent implements OnInit {
     // Se tutte le condizioni sono soddisfatte, procedi con la gestione
     this.auctionSelected.emit(auction);
   }
+
+  async onDownloadCSV(auction: Asta): Promise<void> {
+    if (!auction.id) {
+      this.notificationsService.showError('Errore: ID asta mancante');
+      return;
+    }
+
+    try {
+      console.log('Inizio download CSV per asta:', auction.nome);
+      await this.astaService.downloadRostersCSV(auction.id, auction.nome);
+      this.notificationsService.showSuccess('CSV delle rose scaricato con successo!');
+    } catch (error) {
+      console.error('Errore download CSV:', error);
+      this.notificationsService.showError('Errore durante il download del CSV: ' + (error as any).message);
+    }
+  }
 }

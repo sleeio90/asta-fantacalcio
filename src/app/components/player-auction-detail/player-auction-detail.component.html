@@ -87,9 +87,13 @@
             </div>
           </div>
 
-          <!-- Pulsante accesso asta -->
-          <div class="auction-actions" *ngIf="isAuctionAccessible(auction)">
-            <button mat-raised-button color="primary" (click)="accessAuction(auction)">
+          <!-- Pulsanti azioni asta -->
+          <div class="auction-actions">
+            <!-- Pulsante accesso asta (se attiva e completa) -->
+            <button *ngIf="isAuctionAccessible(auction)" 
+                    mat-raised-button 
+                    color="primary" 
+                    (click)="accessAuction(auction)">
               Accedi all'Asta
             </button>
           </div>
