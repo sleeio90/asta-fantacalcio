@@ -172,6 +172,19 @@
                     
                     <div class="calciatori-lista">
                       <mat-tab-group>
+                        <mat-tab label="Tutti">
+                          <div class="player-item" *ngFor="let calciatore of team.getTuttiGiocatori()">
+                            <div class="player-details">
+                              <span class="{{getRuoloClass(calciatore.codiceRuolo)}} ruolo-badge">{{calciatore.codiceRuolo}}</span>
+                              <strong>{{calciatore.nome}}</strong>
+                              <span class="team-name">({{calciatore.squadra}})</span>
+                              <span class="player-price">{{calciatore.prezzoAcquisto}} cr.</span>
+                            </div>
+                            <button mat-icon-button color="warn" (click)="onRemoveCalciatore(team, calciatore)" matTooltip="Rimuovi calciatore">
+                              <mat-icon>delete</mat-icon>
+                            </button>
+                          </div>
+                        </mat-tab>
                         <mat-tab label="Portieri">
                           <div class="player-item" *ngFor="let calciatore of team.getPortieri()">
                             <div class="player-details">

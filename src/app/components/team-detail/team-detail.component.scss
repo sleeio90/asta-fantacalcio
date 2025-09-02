@@ -126,3 +126,10 @@ td[mat-cell]:nth-child(6) {
   font-weight: normal;
   color: #555;
 }
+
+/* Stile per il messaggio di no permissions */
+.no-permissions {
+  color: #999;
+  font-style: italic;
+  font-size: 0.9em;
+}

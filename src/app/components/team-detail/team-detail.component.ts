@@ -3,6 +3,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { AstaService } from '../../services/asta.service';
 import { FirebaseAstaService } from '../../services/firebase-asta.service';
 import { NotificationsService } from '../../services/notifications.service';
+import { AuthService } from '../../services/auth.service';
 import { Team } from '../../models/team.model';
 import { Asta } from '../../models/asta.model';
 import { Calciatore } from '../../models/calciatore.model';
@@ -27,7 +28,8 @@ export class TeamDetailComponent implements OnInit, OnChanges, OnDestroy {
     private router: Router,
     private astaService: AstaService,
     private firebaseAstaService: FirebaseAstaService,
-    private notificationsService: NotificationsService
+    private notificationsService: NotificationsService,
+    private authService: AuthService
   ) { }
 
   ngOnInit(): void {
@@ -139,7 +141,25 @@ export class TeamDetailComponent implements OnInit, OnChanges, OnDestroy {
     }
   }
 
-  removeCalciatore(calciatore: Calciatore): void {
+  removeCalciatore(calciatore: Calciatore, event?: Event): void {
+    // Ferma la propagazione dell'evento per evitare problemi di routing
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+
+    // Controlla se l'utente può modificare questo team
+    if (!this.canManageTeam()) {
+      this.notificationsService.showError('Non hai il permesso di modificare questo team');
+      return;
+    }
+
+    // Mostra conferma prima dell'eliminazione
+    const confirmMessage = `Sei sicuro di voler eliminare ${calciatore.nome} dal team ${this.team?.nome}?`;
+    if (!confirm(confirmMessage)) {
+      return; // L'utente ha cancellato
+    }
+
     // Passa l'ID dell'asta se disponibile
     const astaId = this.asta?.id;
     this.astaService.rimuoviAssegnazione(calciatore, astaId).subscribe({
@@ -157,7 +177,19 @@ export class TeamDetailComponent implements OnInit, OnChanges, OnDestroy {
     });
   }
 
-  editCalciatore(calciatore: Calciatore): void {
+  editCalciatore(calciatore: Calciatore, event?: Event): void {
+    // Ferma la propagazione dell'evento per evitare problemi di routing
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+
+    // Controlla se l'utente può modificare questo team
+    if (!this.canManageTeam()) {
+      this.notificationsService.showError('Non hai il permesso di modificare questo team');
+      return;
+    }
+
     const nuovoPrezzo = prompt(`Inserisci il nuovo prezzo per ${calciatore.nome}:`, calciatore.prezzoAcquisto?.toString() || '0');
     
     if (nuovoPrezzo === null) {
@@ -258,6 +290,23 @@ export class TeamDetailComponent implements OnInit, OnChanges, OnDestroy {
     return [...this.team.calciatori].sort((a, b) => {
       return ordineRuoli[a.codiceRuolo] - ordineRuoli[b.codiceRuolo];
     });
+  }
+
+  // Controlla se l'utente corrente può gestire questo team
+  canManageTeam(): boolean {
+    const currentUser = this.authService.getCurrentUser();
+    if (!currentUser || !this.team) {
+      return false;
+    }
+
+    // L'admin può gestire tutti i team
+    if (currentUser.role === 'admin') {
+      return true;
+    }
+
+    // Il proprietario del team può gestirlo
+    const teamUserId = (this.team as any).userId;
+    return teamUserId === currentUser.uid;
   }
 
   ngOnDestroy(): void {

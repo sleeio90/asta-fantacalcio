@@ -30,6 +30,15 @@ export class Team {
     return this.calciatori.filter(c => c.codiceRuolo === 'A');
   }
 
+  getTuttiGiocatori(): Calciatore[] {
+    const ordineRuoli = ['P', 'D', 'C', 'A'];
+    return this.calciatori.sort((a, b) => {
+      const indexA = ordineRuoli.indexOf(a.codiceRuolo);
+      const indexB = ordineRuoli.indexOf(b.codiceRuolo);
+      return indexA - indexB;
+    });
+  }
+
   haRaggiuntolLimite(ruolo: string): boolean {
     switch (ruolo) {
       case 'P': return this.getPortieri().length >= 3;

@@ -1,15 +1,16 @@
 <div class="container" *ngIf="asta">
+  <!-- Header con pulsante di ritorno -->
+  <div class="header-section">
+    <button mat-raised-button color="primary" (click)="goBack()" class="back-button">
+      <mat-icon>arrow_back</mat-icon>
+      Torna alla Home
+    </button>
+  </div>
+
   <mat-card>
     <mat-card-header>
-      <div class="header-with-back">
-        <button mat-icon-button (click)="goBack()" class="back-button" title="Torna alla Home">
-          <mat-icon>arrow_back</mat-icon>
-        </button>
-        <div>
-          <mat-card-title>Riepilogo Asta: {{ asta.nome }}</mat-card-title>
-          <mat-card-subtitle>Riepilogo dei team e delle assegnazioni</mat-card-subtitle>
-        </div>
-      </div>
+      <mat-card-title>Riepilogo Asta: {{ asta.nome }}</mat-card-title>
+      <mat-card-subtitle>Riepilogo dei team e delle assegnazioni</mat-card-subtitle>
     </mat-card-header>
     
     <mat-card-content>
@@ -31,8 +32,8 @@
               </div>
             </div>
 
-            <div *ngFor="let team of teams" class="row team-row mt-3" (click)="goToTeamDetail(team)">
-              <div class="col-md-3">
+            <div *ngFor="let team of teams" class="row team-row mt-3">
+              <div class="col-md-3" (click)="goToTeamDetail(team)" style="cursor: pointer;">
                 <div class="team-info">
                   <h5>{{ team.nome }}</h5>
                   <div [ngClass]="getBudgetClass(team)">
