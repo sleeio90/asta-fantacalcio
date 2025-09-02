@@ -76,7 +76,9 @@ export class Team {
   }
 
   getTotaleSpeso(): number {
-    return this.budgetIniziale - this.budget;
+    // Calcola il totale sommando direttamente i prezzi di acquisto dei calciatori
+    // Questo è più affidabile del calcolo budgetIniziale - budget per evitare inconsistenze
+    return this.calciatori.reduce((total, calciatore) => total + (calciatore.prezzoAcquisto || 0), 0);
   }
   
   getTotaleSpesoPorRuolo(ruolo: string): number {

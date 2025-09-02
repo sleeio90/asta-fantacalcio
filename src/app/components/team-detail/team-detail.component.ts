@@ -1,6 +1,7 @@
 import { Component, Input, OnInit, OnChanges, SimpleChanges, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AstaService } from '../../services/asta.service';
+import { FirebaseAstaService } from '../../services/firebase-asta.service';
 import { NotificationsService } from '../../services/notifications.service';
 import { Team } from '../../models/team.model';
 import { Asta } from '../../models/asta.model';
@@ -25,6 +26,7 @@ export class TeamDetailComponent implements OnInit, OnChanges, OnDestroy {
     private route: ActivatedRoute,
     private router: Router,
     private astaService: AstaService,
+    private firebaseAstaService: FirebaseAstaService,
     private notificationsService: NotificationsService
   ) { }
 
@@ -138,7 +140,9 @@ export class TeamDetailComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   removeCalciatore(calciatore: Calciatore): void {
-    this.astaService.rimuoviAssegnazione(calciatore).subscribe({
+    // Passa l'ID dell'asta se disponibile
+    const astaId = this.asta?.id;
+    this.astaService.rimuoviAssegnazione(calciatore, astaId).subscribe({
       next: (success) => {
         if (success) {
           this.notificationsService.showSuccess(`${calciatore.nome} rimosso con successo`);
@@ -150,6 +154,51 @@ export class TeamDetailComponent implements OnInit, OnChanges, OnDestroy {
         console.error('Errore nella rimozione:', error);
         this.notificationsService.showError(`Errore durante la rimozione di ${calciatore.nome}`);
       }
+    });
+  }
+
+  editCalciatore(calciatore: Calciatore): void {
+    const nuovoPrezzo = prompt(`Inserisci il nuovo prezzo per ${calciatore.nome}:`, calciatore.prezzoAcquisto?.toString() || '0');
+    
+    if (nuovoPrezzo === null) {
+      return; // L'utente ha cancellato
+    }
+
+    const prezzo = parseInt(nuovoPrezzo);
+    if (isNaN(prezzo) || prezzo < 1) {
+      this.notificationsService.showError('Inserisci un prezzo valido (maggiore di 0)');
+      return;
+    }
+
+    this.modificaPrezzocalciatore(calciatore, prezzo);
+  }
+
+  private modificaPrezzocalciatore(calciatore: Calciatore, nuovoPrezzo: number): void {
+    if (!this.team || !this.asta?.id) {
+      this.notificationsService.showError('Errore: team o asta non disponibili');
+      return;
+    }
+
+    const prezzoVecchio = calciatore.prezzoAcquisto || 0;
+    const differenza = nuovoPrezzo - prezzoVecchio;
+
+    // Controlla se il team ha abbastanza budget per l'incremento
+    if (differenza > this.team.budget) {
+      this.notificationsService.showError(`Budget insufficiente. Disponibile: ${this.team.budget}, richiesto: ${differenza}`);
+      return;
+    }
+
+    // NON aggiornare localmente - lascia che Firebase si occupi dell'aggiornamento
+    // Aggiorna su Firebase
+    this.firebaseAstaService.updateCalciatorePrezzo(this.asta.id, this.team.nome, calciatore, nuovoPrezzo).then((success: boolean) => {
+      if (success) {
+        this.notificationsService.showSuccess(`Prezzo di ${calciatore.nome} aggiornato a ${nuovoPrezzo} crediti`);
+      } else {
+        this.notificationsService.showError(`Errore durante l'aggiornamento del prezzo di ${calciatore.nome}`);
+      }
+    }).catch((error: any) => {
+      console.error('Errore nell\'aggiornamento:', error);
+      this.notificationsService.showError(`Errore durante l'aggiornamento del prezzo di ${calciatore.nome}`);
     });
   }
 

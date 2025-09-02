@@ -54,7 +54,12 @@ export class FirebaseAstaService {
           
           if (calcData && calcData.nome && calcData.id && calcData.codiceRuolo) {
             const calciatore = new Calciatore(calcData);
-            team.addCalciatore(calciatore, calcData.prezzoAcquisto || 0);
+            // Non usare addCalciatore perché il budget è già quello aggiornato da Firebase
+            // Aggiungi direttamente il calciatore alla lista senza modificare il budget
+            calciatore.assegnato = true;
+            calciatore.teamAssegnato = team.nome;
+            calciatore.prezzoAcquisto = calcData.prezzoAcquisto || 0;
+            team.calciatori.push(calciatore);
           } else {
             console.warn('Calciatore team con dati incompleti ignorato:', calcData);
           }
@@ -705,6 +710,76 @@ export class FirebaseAstaService {
           });
         },
         error: reject
+      });
+    });
+  }
+
+  updateCalciatorePrezzo(astaId: string, teamNome: string, calciatore: Calciatore, nuovoPrezzo: number): Promise<boolean> {
+    return new Promise((resolve, reject) => {
+      // Non usare getAstaById per evitare loop - lavora direttamente sui dati Firebase
+      this.db.object(`/aste/${astaId}`).valueChanges().pipe(take(1)).subscribe(astaData => {
+        if (!astaData) {
+          reject(new Error('Asta non trovata'));
+          return;
+        }
+
+        const data = astaData as any;
+        
+        // Trova il team nei dati Firebase
+        const teamKeys = Object.keys(data.teams || {});
+        let teamIndex = -1;
+        let teamData = null;
+        
+        for (let i = 0; i < teamKeys.length; i++) {
+          const team = data.teams[teamKeys[i]];
+          if (team.nome === teamNome) {
+            teamIndex = i;
+            teamData = team;
+            break;
+          }
+        }
+
+        if (!teamData) {
+          reject(new Error('Team non trovato'));
+          return;
+        }
+
+        // Trova il calciatore nei dati Firebase
+        const calciatoreData = teamData.calciatori?.[`calc_${calciatore.id}`];
+        if (!calciatoreData) {
+          reject(new Error('Calciatore non trovato nel team'));
+          return;
+        }
+
+        const prezzoVecchio = calciatoreData.prezzoAcquisto || 0;
+        const differenza = nuovoPrezzo - prezzoVecchio;
+
+        // Controlla il budget
+        if (differenza > teamData.budget) {
+          reject(new Error('Budget insufficiente'));
+          return;
+        }
+
+        // Prepara gli aggiornamenti atomici per Firebase
+        const updates: any = {};
+        const newBudget = teamData.budget - differenza;
+        
+        updates[`/aste/${astaId}/teams/team_${teamIndex}/budget`] = newBudget;
+        updates[`/aste/${astaId}/teams/team_${teamIndex}/calciatori/calc_${calciatore.id}/prezzoAcquisto`] = nuovoPrezzo;
+
+        // Aggiorna anche l'asta corrente se è la stessa (senza triggering del subject)
+        if (this.astaSubject.value && this.astaSubject.value.id === astaId) {
+          updates[`/asta/teams/team_${teamIndex}/budget`] = newBudget;
+          updates[`/asta/teams/team_${teamIndex}/calciatori/calc_${calciatore.id}/prezzoAcquisto`] = nuovoPrezzo;
+        }
+
+        this.db.object('/').update(updates).then(() => {
+          console.log('Prezzo calciatore aggiornato con successo');
+          resolve(true);
+        }).catch(error => {
+          console.error('Errore durante l\'aggiornamento del prezzo:', error);
+          resolve(false);
+        });
       });
     });
   }
