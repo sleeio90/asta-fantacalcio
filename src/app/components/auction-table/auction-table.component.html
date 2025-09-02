@@ -17,7 +17,8 @@
       <mat-tab-group>
         <mat-tab label="Tutti i Team">
           <div class="teams-container">
-            <div class="row mt-3 team-header">
+            <!-- Header per desktop -->
+            <div class="row mt-3 team-header d-none d-md-flex">
               <div class="col-md-3">
                 <h3>Team</h3>
               </div>
@@ -32,43 +33,77 @@
               </div>
             </div>
 
-            <div *ngFor="let team of teams" class="row team-row mt-3">
-              <div class="col-md-3" (click)="goToTeamDetail(team)" style="cursor: pointer;">
-                <div class="team-info">
-                  <h5>{{ team.nome }}</h5>
-                  <div [ngClass]="getBudgetClass(team)">
-                    Budget: {{ team.budget }} / {{ team.budgetIniziale }}
+            <div *ngFor="let team of teams" class="team-row mt-3">
+              <!-- Layout Desktop -->
+              <div class="row d-none d-md-flex">
+                <div class="col-md-3" (click)="goToTeamDetail(team)" style="cursor: pointer;">
+                  <div class="team-info">
+                    <h5>{{ team.nome }}</h5>
+                    <div [ngClass]="getBudgetClass(team)">
+                      Budget: {{ team.budget }} / {{ team.budgetIniziale }}
+                    </div>
+                    <div>
+                      Speso: {{ getTotaleSpeso(team) }}
+                    </div>
                   </div>
-                  <div>
-                    Speso: {{ getTotaleSpeso(team) }}
+                </div>
+                <div class="col-md-9">
+                  <div class="row">
+                    <div class="col-md-3" *ngFor="let ruolo of ruoli">
+                      <div class="ruolo-container" [ngClass]="'ruolo-' + (ruolo === 'P' ? 'portiere' : ruolo === 'D' ? 'difensore' : ruolo === 'C' ? 'centrocampista' : 'attaccante')">
+                        <div class="ruolo-header">
+                          <div class="ruolo-count">
+                            {{ countCalciatori(team, ruolo) }}
+                          </div>
+                          <div class="ruolo-totale">
+                            Totale: {{ getTotaleSpesoPorRuolo(team, ruolo) }}
+                          </div>
+                        </div>
+                        <div class="calciatori-list" style="color: #333;">
+                          <div *ngFor="let calciatore of getCalciatoriByRuolo(team, ruolo)" class="calciatore-single-row">
+                            <span class="calciatore-nome">
+                              <span class="ruolo-pallino" [ngClass]="'ruolo-' + (calciatore.codiceRuolo === 'P' ? 'portiere' : calciatore.codiceRuolo === 'D' ? 'difensore' : calciatore.codiceRuolo === 'C' ? 'centrocampista' : 'attaccante')">{{ calciatore.codiceRuolo }}</span>
+                              {{ calciatore.nome }}
+                            </span>
+                            <span class="calciatore-squadra">({{ calciatore.squadra }})</span>
+                            <span class="calciatore-prezzo">{{ calciatore.prezzoAcquisto }}</span>
+                          </div>
+                          
+                          <div *ngIf="getCalciatoriByRuolo(team, ruolo).length === 0" class="calciatore-empty">
+                            Nessun calciatore
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
-              <div class="col-md-9">
-                <div class="row">
-                  <div class="col-md-3" *ngFor="let ruolo of ruoli">
-                    <div class="ruolo-container" [ngClass]="'ruolo-' + (ruolo === 'P' ? 'portiere' : ruolo === 'D' ? 'difensore' : ruolo === 'C' ? 'centrocampista' : 'attaccante')">
-                      <div class="ruolo-header">
-                        <div class="ruolo-count">
-                          {{ countCalciatori(team, ruolo) }}
-                        </div>
-                        <div class="ruolo-totale">
-                          Totale: {{ getTotaleSpesoPorRuolo(team, ruolo) }}
-                        </div>
+
+              <!-- Layout Mobile -->
+              <div class="mobile-team-layout d-block d-md-none">
+                <div class="mobile-team-header" (click)="goToTeamDetail(team)" style="cursor: pointer;">
+                  <h5>{{ team.nome }}</h5>
+                  <div class="mobile-team-stats">
+                    <span [ngClass]="getBudgetClass(team)">Budget: {{ team.budget }}/{{ team.budgetIniziale }}</span>
+                    <span class="speso">Speso: {{ getTotaleSpeso(team) }}</span>
+                  </div>
+                </div>
+                
+                <div class="mobile-ruoli-container">
+                  <div class="mobile-ruolo-section" *ngFor="let ruolo of ruoli">
+                    <div class="mobile-ruolo-header" [ngClass]="'ruolo-' + (ruolo === 'P' ? 'portiere' : ruolo === 'D' ? 'difensore' : ruolo === 'C' ? 'centrocampista' : 'attaccante')">
+                      <span class="ruolo-nome">{{ getNomeRuolo(ruolo) }}</span>
+                      <span class="ruolo-info">{{ countCalciatori(team, ruolo) }} - Tot: {{ getTotaleSpesoPorRuolo(team, ruolo) }}</span>
+                    </div>
+                    <div class="mobile-calciatori-list">
+                      <div *ngFor="let calciatore of getCalciatoriByRuolo(team, ruolo)" class="mobile-calciatore-item">
+                        <span class="ruolo-pallino" [ngClass]="'ruolo-' + (calciatore.codiceRuolo === 'P' ? 'portiere' : calciatore.codiceRuolo === 'D' ? 'difensore' : calciatore.codiceRuolo === 'C' ? 'centrocampista' : 'attaccante')">{{ calciatore.codiceRuolo }}</span>
+                        <span class="calciatore-nome">{{ calciatore.nome }}</span>
+                        <span class="calciatore-squadra">({{ calciatore.squadra }})</span>
+                        <span class="calciatore-prezzo">{{ calciatore.prezzoAcquisto }}cr</span>
                       </div>
-                      <div class="calciatori-list" style="color: #333;">
-                        <div *ngFor="let calciatore of getCalciatoriByRuolo(team, ruolo)" class="calciatore-single-row">
-                          <span class="calciatore-nome">
-                            <span class="ruolo-pallino" [ngClass]="'ruolo-' + (calciatore.codiceRuolo === 'P' ? 'portiere' : calciatore.codiceRuolo === 'D' ? 'difensore' : calciatore.codiceRuolo === 'C' ? 'centrocampista' : 'attaccante')">{{ calciatore.codiceRuolo }}</span>
-                            {{ calciatore.nome }}
-                          </span>
-                          <span class="calciatore-squadra">({{ calciatore.squadra }})</span>
-                          <span class="calciatore-prezzo">{{ calciatore.prezzoAcquisto }}</span>
-                        </div>
-                        
-                        <div *ngIf="getCalciatoriByRuolo(team, ruolo).length === 0" class="calciatore-empty">
-                          Nessun calciatore
-                        </div>
+                      <div *ngIf="getCalciatoriByRuolo(team, ruolo).length === 0" class="mobile-calciatore-empty">
+                        Nessun calciatore
                       </div>
                     </div>
                   </div>

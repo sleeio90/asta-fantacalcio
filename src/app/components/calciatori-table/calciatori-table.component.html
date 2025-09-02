@@ -1,5 +1,7 @@
-<div class="mat-elevation-z8">
-  <table mat-table [dataSource]="dataSource" matSort>
+<div class="table-container">
+  <!-- Layout Desktop -->
+  <div class="mat-elevation-z8 d-none d-md-block">
+    <table mat-table [dataSource]="dataSource" matSort>
     <!-- ID Column -->
     <ng-container matColumnDef="id">
       <th mat-header-cell *matHeaderCellDef mat-sort-header>ID</th>
@@ -72,4 +74,59 @@
   </table>
 
   <mat-paginator [pageSizeOptions]="[10, 25, 50, 100]" showFirstLastButtons></mat-paginator>
+  </div>
+
+  <!-- Layout Mobile -->
+  <div class="d-block d-md-none">
+    <div class="mobile-calciatori-list">
+      <div *ngFor="let calciatore of dataSource.filteredData" class="mobile-calciatore-card">
+        <div class="mobile-calciatore-header">
+          <span class="ruolo-badge" [ngClass]="getRuoloClass(calciatore.codiceRuolo)">
+            {{ calciatore.codiceRuolo }}
+          </span>
+          <h4>{{ calciatore.nome }}</h4>
+          <button 
+            mat-icon-button 
+            color="primary" 
+            matTooltip="Assegna calciatore"
+            [disabled]="calciatore.assegnato"
+            *ngIf="astaCreata"
+            class="mobile-action-btn"
+          >
+            <mat-icon>add_shopping_cart</mat-icon>
+          </button>
+        </div>
+        <div class="mobile-calciatore-details">
+          <div class="detail-row">
+            <span class="detail-label">ID:</span>
+            <span class="detail-value">{{ calciatore.id }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Squadra:</span>
+            <span class="detail-value">{{ calciatore.squadra }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Qt. Attuale:</span>
+            <span class="detail-value">{{ calciatore.quotazioneAttuale }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Qt. Iniziale:</span>
+            <span class="detail-value">{{ calciatore.quotazioneIniziale }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Diff:</span>
+            <span class="detail-value" [class.positive]="(calciatore.differenza || 0) > 0" [class.negative]="(calciatore.differenza || 0) < 0">
+              {{ calciatore.differenza || 0 }}
+            </span>
+          </div>
+        </div>
+      </div>
+      <div *ngIf="dataSource.filteredData.length === 0" class="mobile-empty-message">
+        Nessun calciatore trovato
+      </div>
+    </div>
+    
+    <!-- Paginator mobile -->
+    <mat-paginator [pageSizeOptions]="[10, 25, 50]" showFirstLastButtons class="mobile-paginator"></mat-paginator>
+  </div>
 </div>

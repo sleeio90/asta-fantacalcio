@@ -21,3 +21,105 @@ table {
   width: 80px;
   text-align: center;
 }
+
+/* Stili per layout mobile */
+.mobile-calciatori-list {
+  padding: 10px 0;
+}
+
+.mobile-calciatore-card {
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.mobile-calciatore-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 15px;
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #eee;
+  
+  .ruolo-badge {
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    min-width: 24px;
+    text-align: center;
+    margin-right: 10px;
+  }
+  
+  h4 {
+    flex: 1;
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 500;
+    color: #333;
+  }
+}
+
+.mobile-action-btn {
+  flex-shrink: 0;
+}
+
+.mobile-calciatore-details {
+  padding: 12px 15px;
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 3px 0;
+  font-size: 0.9rem;
+  
+  &:not(:last-child) {
+    border-bottom: 1px solid #f0f0f0;
+    padding-bottom: 6px;
+    margin-bottom: 6px;
+  }
+}
+
+.detail-label {
+  font-weight: 500;
+  color: #666;
+}
+
+.detail-value {
+  color: #333;
+  
+  &.positive {
+    color: #4caf50;
+    font-weight: 500;
+  }
+  
+  &.negative {
+    color: #f44336;
+    font-weight: 500;
+  }
+}
+
+.mobile-empty-message {
+  text-align: center;
+  padding: 40px 20px;
+  color: #999;
+  font-style: italic;
+}
+
+.mobile-paginator {
+  border-top: 1px solid #ddd;
+  background-color: #f8f9fa;
+}
+
+@media (max-width: 767.98px) {
+  .table-container {
+    margin: 0;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+}

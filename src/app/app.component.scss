@@ -104,3 +104,104 @@ mat-toolbar {
 .budget-danger {
   color: #f44336;
 }
+
+/* Stili responsive per l'app principale */
+.desktop-nav {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.mobile-nav {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.mobile-user-info {
+  display: flex;
+  align-items: center;
+  padding: 15px;
+  gap: 10px;
+  
+  .user-details {
+    display: flex;
+    flex-direction: column;
+    
+    .user-name {
+      font-weight: 500;
+      font-size: 0.95rem;
+      color: #333;
+    }
+    
+    .user-role-mobile {
+      font-size: 0.85rem;
+      color: #666;
+      
+      &.admin-role {
+        color: #ff6b35;
+        font-weight: 500;
+      }
+    }
+  }
+}
+
+.toolbar-title {
+  font-size: 1.2rem;
+  font-weight: 500;
+  
+  @media (max-width: 575.98px) {
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 767.98px) {
+  .content-container {
+    padding: 10px;
+    margin-top: 10px;
+  }
+  
+  mat-toolbar {
+    padding: 0 8px;
+    
+    .mat-toolbar-row {
+      height: 56px;
+    }
+    
+    .toolbar-title {
+      font-size: 1.1rem;
+    }
+    
+    .mat-raised-button {
+      font-size: 0.85rem;
+      padding: 8px 12px;
+      min-width: auto;
+    }
+  }
+  
+  .loading-container {
+    padding: 20px;
+    
+    p {
+      font-size: 14px;
+      text-align: center;
+    }
+  }
+}
+
+@media (max-width: 575.98px) {
+  .content-container {
+    padding: 5px;
+  }
+  
+  mat-toolbar {
+    .toolbar-title {
+      font-size: 1rem;
+    }
+    
+    .mat-raised-button {
+      font-size: 0.8rem;
+      padding: 6px 10px;
+    }
+  }
+}

@@ -133,3 +133,122 @@ td[mat-cell]:nth-child(6) {
   font-style: italic;
   font-size: 0.9em;
 }
+
+/* Stili per layout mobile */
+.mobile-player-list {
+  padding: 10px 0;
+}
+
+.mobile-player-card {
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.mobile-player-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 15px;
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #eee;
+  
+  .ruolo-badge {
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    min-width: 24px;
+    text-align: center;
+    margin-right: 10px;
+  }
+  
+  h4 {
+    flex: 1;
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 500;
+    color: #333;
+  }
+}
+
+.mobile-player-actions {
+  display: flex;
+  gap: 5px;
+}
+
+.mobile-player-details {
+  padding: 12px 15px;
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 3px 0;
+  font-size: 0.9rem;
+  
+  &:not(:last-child) {
+    border-bottom: 1px solid #f0f0f0;
+    padding-bottom: 6px;
+    margin-bottom: 6px;
+  }
+}
+
+.detail-label {
+  font-weight: 500;
+  color: #666;
+}
+
+.detail-value {
+  color: #333;
+  
+  &.price {
+    font-weight: 600;
+    color: #2196f3;
+  }
+}
+
+.mobile-empty-message {
+  text-align: center;
+  padding: 40px 20px;
+  color: #999;
+  font-style: italic;
+}
+
+/* Media queries responsive */
+@media (max-width: 767.98px) {
+  .team-header {
+    flex-direction: column;
+    align-items: flex-start;
+    text-align: left;
+    padding: 12px;
+    
+    h2 {
+      font-size: 1.3rem;
+      margin-bottom: 10px;
+    }
+    
+    .team-budget {
+      text-align: left;
+      font-size: 0.9rem;
+      
+      div {
+        margin-bottom: 5px;
+      }
+    }
+  }
+  
+  .mat-tab-group {
+    .mat-tab-header {
+      .mat-tab-label {
+        padding: 0 8px;
+        min-width: 60px;
+        font-size: 0.85rem;
+      }
+    }
+  }
+}

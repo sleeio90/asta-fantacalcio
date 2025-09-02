@@ -192,3 +192,216 @@ h3 {
   color: #3f51b5;
   margin-bottom: 20px;
 }
+
+/* Stili responsive per mobile */
+@media (max-width: 991.98px) {
+  .row > div[class*="col-"] {
+    margin-bottom: 20px;
+  }
+}
+
+/* Stili per layout mobile migliorati */
+.mobile-player-card {
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  transition: box-shadow 0.2s ease;
+  
+  &:hover {
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  }
+}
+
+.mobile-player-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 15px;
+  min-height: 60px;
+}
+
+.player-main-info {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  min-width: 0; // Allow text truncation
+}
+
+.ruolo-badge.mobile {
+  width: 28px;
+  height: 28px;
+  line-height: 28px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  margin-right: 12px;
+  flex-shrink: 0;
+}
+
+.player-name-section {
+  display: flex;
+  flex-direction: column;
+  min-width: 0; // Allow text truncation
+  flex: 1;
+}
+
+.player-name {
+  font-size: 1rem;
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.team-name.mobile {
+  font-size: 0.85rem;
+  color: #666;
+  font-weight: normal;
+}
+
+.player-actions-mobile {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.player-price.mobile {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #2196f3;
+  min-width: 60px;
+  text-align: right;
+}
+
+.players-list-container {
+  min-height: 200px;
+}
+
+// Miglioramenti per le tab su mobile
+@media (max-width: 991.98px) {
+  .mat-tab-group {
+    .mat-tab-header {
+      .mat-tab-label {
+        padding: 0 8px;
+        min-width: 50px;
+        font-size: 0.85rem;
+        
+        @media (max-width: 575.98px) {
+          font-size: 0.8rem;
+          min-width: 45px;
+        }
+      }
+    }
+    
+    .mat-tab-body-wrapper {
+      padding-top: 10px;
+    }
+  }
+  
+  .team-card {
+    .mat-card-content {
+      padding: 12px;
+    }
+  }
+}
+
+@media (max-width: 767.98px) {
+  .header-section {
+    margin-bottom: 15px;
+    
+    .back-button {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+  
+  .ruolo-filter-container {
+    margin-bottom: 20px;
+    
+    .ruolo-filter-label {
+      font-size: 0.9rem;
+      margin-bottom: 10px;
+    }
+    
+    .ruolo-filter-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      
+      .ruolo-filter-btn {
+        flex: 1;
+        min-width: 60px;
+        font-size: 0.9rem;
+      }
+    }
+  }
+  
+  .calciatore-details {
+    margin-bottom: 20px;
+    padding: 15px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    
+    h4 {
+      font-size: 1.1rem;
+      margin-bottom: 15px;
+    }
+    
+    .row > div[class*="col-"] {
+      margin-bottom: 10px;
+      
+      strong {
+        display: block;
+        font-size: 0.85rem;
+        color: #666;
+        margin-bottom: 2px;
+      }
+    }
+  }
+  
+  .teams-list {
+    .team-card {
+      margin-bottom: 15px;
+      
+      .mat-card-header {
+        padding: 12px;
+        
+        .mat-card-title {
+          font-size: 1.1rem;
+        }
+        
+        .mat-card-subtitle {
+          font-size: 0.85rem;
+        }
+      }
+      
+      .mat-card-content {
+        padding: 0 12px 12px 12px;
+      }
+    }
+  }
+  
+  .player-item {
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+    
+    .player-details {
+      font-size: 0.9rem;
+      
+      strong {
+        display: block;
+        margin-bottom: 2px;
+      }
+      
+      .team-name,
+      .player-price {
+        font-size: 0.8rem;
+        color: #666;
+      }
+    }
+  }
+}

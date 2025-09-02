@@ -108,7 +108,7 @@ h3 {
   gap: 12px;
 }
 
-// Stili per il pannello espandibile "Unisciti a un'asta"
+// Stili semplici per il pannello espandibile "Unisciti a un'asta"
 .join-auction-panel {
   margin-top: 20px;
   border: 1px solid #e0e0e0;
@@ -135,11 +135,67 @@ h3 {
   }
 
   .expansion-content {
-    padding: 16px 0;
+    padding: 0;
   }
 
   &.mat-expanded {
     border-color: #2196f3;
     box-shadow: 0 4px 12px rgba(33, 150, 243, 0.15);
+  }
+}
+
+/* Stili responsive per mobile */
+@media (max-width: 767.98px) {
+  .container {
+    padding: 10px;
+  }
+  
+  .admin-welcome,
+  .player-welcome {
+    margin-bottom: 15px;
+    
+    .welcome-content {
+      flex-direction: column;
+      text-align: center;
+      gap: 12px;
+      
+      .admin-icon,
+      .player-icon {
+        font-size: 36px;
+        width: 36px;
+        height: 36px;
+      }
+      
+      h2 {
+        font-size: 1.3rem;
+        margin-bottom: 5px;
+      }
+      
+      p {
+        font-size: 0.9rem;
+        line-height: 1.4;
+      }
+    }
+  }
+}
+
+@media (max-width: 575.98px) {
+  .container {
+    padding: 8px;
+  }
+  
+  .admin-welcome,
+  .player-welcome {
+    margin-bottom: 16px;
+    
+    .welcome-content {
+      h2 {
+        font-size: 1.2rem;
+      }
+      
+      p {
+        font-size: 0.85rem;
+      }
+    }
   }
 }

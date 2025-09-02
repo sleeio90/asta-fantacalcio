@@ -233,3 +233,147 @@
   color: #999;
   font-size: 0.9rem;
 }
+
+/* Stili per layout mobile */
+.mobile-team-layout {
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  margin-bottom: 15px;
+  overflow: hidden;
+}
+
+.mobile-team-header {
+  padding: 15px;
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #eee;
+  
+  h5 {
+    margin: 0 0 8px 0;
+    color: #3f51b5;
+    font-weight: 500;
+  }
+}
+
+.mobile-team-stats {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.9rem;
+  
+  .speso {
+    color: #666;
+  }
+}
+
+.mobile-ruoli-container {
+  padding: 10px;
+}
+
+.mobile-ruolo-section {
+  margin-bottom: 15px;
+  
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.mobile-ruolo-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  border-radius: 6px;
+  margin-bottom: 8px;
+  
+  .ruolo-nome {
+    font-weight: 500;
+    font-size: 0.9rem;
+  }
+  
+  .ruolo-info {
+    font-size: 0.8rem;
+    opacity: 0.9;
+  }
+}
+
+.mobile-calciatori-list {
+  padding-left: 15px;
+}
+
+.mobile-calciatore-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 0;
+  border-bottom: 1px solid #f0f0f0;
+  font-size: 0.85rem;
+  
+  &:last-child {
+    border-bottom: none;
+  }
+  
+  .calciatore-nome {
+    flex: 2;
+    display: flex;
+    align-items: center;
+  }
+  
+  .calciatore-squadra {
+    flex: 1;
+    text-align: center;
+    color: #666;
+    font-size: 0.8rem;
+  }
+  
+  .calciatore-prezzo {
+    flex: 0 0 auto;
+    font-weight: 500;
+    color: #333;
+  }
+}
+
+.mobile-calciatore-empty {
+  padding: 10px 0;
+  font-style: italic;
+  color: #999;
+  text-align: center;
+  font-size: 0.85rem;
+}
+
+/* Media queries per assicurare responsiveness */
+@media (max-width: 767.98px) {
+  .container {
+    padding: 10px;
+  }
+  
+  .header-section {
+    margin-bottom: 15px;
+    
+    .back-button {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+  
+  mat-card {
+    margin: 0;
+    box-shadow: none;
+    border: 1px solid #ddd;
+  }
+  
+  mat-card-header {
+    padding: 15px 15px 10px 15px;
+    
+    mat-card-title {
+      font-size: 1.2rem;
+    }
+    
+    mat-card-subtitle {
+      font-size: 0.9rem;
+    }
+  }
+  
+  mat-card-content {
+    padding: 10px 15px 15px 15px;
+  }
+}

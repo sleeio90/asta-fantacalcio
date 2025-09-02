@@ -8,26 +8,54 @@
 <div *ngIf="!(authLoading$ | async)">
   <div *ngIf="user$ | async as user">
     <mat-toolbar color="primary">
-      <span>Asta Fantacalcio</span>
+      <span class="toolbar-title">Asta Fantacalcio</span>
       <span class="spacer"></span>
       
-      <!-- Navigation buttons -->
-      <button mat-button (click)="navigateToHome()">
-        <mat-icon>home</mat-icon>
-        Home
-      </button>
-      
-      <!-- User info and logout -->
-      <span class="user-info">
-        <mat-icon>person</mat-icon>
-        {{ user.displayName || user.email }}
-        <span class="user-role" [class.admin-role]="user.role === 'admin'">
-          ({{ user.role === 'admin' ? 'Admin' : 'Giocatore' }})
+      <!-- Navigation buttons - Desktop -->
+      <div class="desktop-nav d-none d-md-flex">
+        <button mat-button (click)="navigateToHome()">
+          <mat-icon>home</mat-icon>
+          Home
+        </button>
+        
+        <!-- User info and logout -->
+        <span class="user-info">
+          <mat-icon>person</mat-icon>
+          {{ user.displayName || user.email }}
+          <span class="user-role" [class.admin-role]="user.role === 'admin'">
+            ({{ user.role === 'admin' ? 'Admin' : 'Giocatore' }})
+          </span>
         </span>
-      </span>
-      <button mat-icon-button (click)="logout()" title="Logout">
-        <mat-icon>logout</mat-icon>
-      </button>
+        <button mat-icon-button (click)="logout()" title="Logout">
+          <mat-icon>logout</mat-icon>
+        </button>
+      </div>
+      
+      <!-- Mobile Menu -->
+      <div class="mobile-nav d-flex d-md-none">
+        <button mat-icon-button (click)="navigateToHome()" title="Home">
+          <mat-icon>home</mat-icon>
+        </button>
+        <button mat-icon-button [matMenuTriggerFor]="mobileMenu" title="Menu">
+          <mat-icon>more_vert</mat-icon>
+        </button>
+        <mat-menu #mobileMenu="matMenu">
+          <div class="mobile-user-info">
+            <mat-icon>person</mat-icon>
+            <div class="user-details">
+              <div class="user-name">{{ user.displayName || user.email }}</div>
+              <div class="user-role-mobile" [class.admin-role]="user.role === 'admin'">
+                {{ user.role === 'admin' ? 'Amministratore' : 'Giocatore' }}
+              </div>
+            </div>
+          </div>
+          <mat-divider></mat-divider>
+          <button mat-menu-item (click)="logout()">
+            <mat-icon>logout</mat-icon>
+            Logout
+          </button>
+        </mat-menu>
+      </div>
     </mat-toolbar>
   </div>
 

@@ -35,13 +35,13 @@
       
       <mat-card-content>
         <div class="row mb-4">
-          <div class="col-md-12">
+          <div class="col-12">
             <h3>Istruzioni per Amministratori</h3>
-            <p>
+            <p class="instructions-text">
               Come amministratore, hai il controllo completo sulla gestione delle aste fantacalcio.
               I giocatori potranno iscriversi alle tue aste utilizzando i codici invito che genererai.
             </p>
-            <ol>
+            <ol class="instructions-list">
               <li>Crea una nuova asta specificando nome, numero di partecipanti e crediti per partecipante</li>
               <li>Condividi il codice invito generato automaticamente con i giocatori</li>
               <li>Gestisci le tue aste: attiva/disattiva o elimina</li>
@@ -64,11 +64,13 @@
     <mat-expansion-panel class="join-auction-panel" [expanded]="false">
       <mat-expansion-panel-header>
         <mat-panel-title>
-          <mat-icon>add_circle_outline</mat-icon>
-          Unisciti a una Nuova Asta
+          <div class="expansion-title">
+            <mat-icon>add_circle_outline</mat-icon>
+            <span class="title-text">Unisciti a una Nuova Asta</span>
+          </div>
         </mat-panel-title>
         <mat-panel-description>
-          Usa il codice invito per partecipare a un'asta fantacalcio
+          <span class="description-text">Usa il codice invito per partecipare a un'asta fantacalcio</span>
         </mat-panel-description>
       </mat-expansion-panel-header>
       

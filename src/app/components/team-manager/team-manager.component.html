@@ -15,7 +15,7 @@
     
     <mat-card-content>
       <div class="row">
-        <div class="col-md-6">
+        <div class="col-12 col-lg-6">
           <h3>Assegna Calciatore</h3>
           <form [formGroup]="assegnazioneForm" (ngSubmit)="onSubmit()">
             <!-- Filtro per ruoli -->
@@ -76,13 +76,13 @@
             <div class="calciatore-details" *ngIf="selectedCalciatore">
               <h4>Dettagli Calciatore</h4>
               <div class="row">
-                <div class="col-md-4">
+                <div class="col-12 col-sm-4">
                   <strong>Nome:</strong> {{ selectedCalciatore.nome }}
                 </div>
-                <div class="col-md-4">
+                <div class="col-12 col-sm-4">
                   <strong>Squadra:</strong> {{ selectedCalciatore.squadra }}
                 </div>
-                <div class="col-md-4">
+                <div class="col-12 col-sm-4">
                   <strong>Ruolo:</strong> 
                   <span [ngClass]="getRuoloClass(selectedCalciatore.codiceRuolo)">
                     {{ selectedCalciatore.codiceRuolo }}
@@ -91,13 +91,13 @@
                 </div>
               </div>
               <div class="row mt-2">
-                <div class="col-md-4">
+                <div class="col-12 col-sm-4">
                   <strong>Qt. Attuale:</strong> {{ selectedCalciatore.quotazioneAttuale }}
                 </div>
-                <div class="col-md-4">
+                <div class="col-12 col-sm-4">
                   <strong>Qt. Iniziale:</strong> {{ selectedCalciatore.quotazioneIniziale }}
                 </div>
-                <div class="col-md-4">
+                <div class="col-12 col-sm-4">
                   <strong>Diff.:</strong> {{ selectedCalciatore.differenza }}
                 </div>
               </div>
@@ -135,7 +135,7 @@
             </div>
           </form>
         </div>
-        <div class="col-md-6">
+        <div class="col-12 col-lg-6">
           <h3>Team</h3>
           <div class="teams-list">
             <mat-card *ngFor="let team of teams" class="team-card">
@@ -173,68 +173,198 @@
                     <div class="calciatori-lista">
                       <mat-tab-group>
                         <mat-tab label="Tutti">
-                          <div class="player-item" *ngFor="let calciatore of team.getTuttiGiocatori()">
-                            <div class="player-details">
-                              <span class="{{getRuoloClass(calciatore.codiceRuolo)}} ruolo-badge">{{calciatore.codiceRuolo}}</span>
-                              <strong>{{calciatore.nome}}</strong>
-                              <span class="team-name">({{calciatore.squadra}})</span>
-                              <span class="player-price">{{calciatore.prezzoAcquisto}} cr.</span>
+                          <div class="players-list-container">
+                            <!-- Layout Desktop -->
+                            <div class="d-none d-lg-block">
+                              <div class="player-item" *ngFor="let calciatore of team.getTuttiGiocatori()">
+                                <div class="player-details">
+                                  <span class="{{getRuoloClass(calciatore.codiceRuolo)}} ruolo-badge">{{calciatore.codiceRuolo}}</span>
+                                  <strong>{{calciatore.nome}}</strong>
+                                  <span class="team-name">({{calciatore.squadra}})</span>
+                                  <span class="player-price">{{calciatore.prezzoAcquisto}} cr.</span>
+                                </div>
+                                <button mat-icon-button color="warn" (click)="onRemoveCalciatore(team, calciatore)" matTooltip="Rimuovi calciatore">
+                                  <mat-icon>delete</mat-icon>
+                                </button>
+                              </div>
                             </div>
-                            <button mat-icon-button color="warn" (click)="onRemoveCalciatore(team, calciatore)" matTooltip="Rimuovi calciatore">
-                              <mat-icon>delete</mat-icon>
-                            </button>
+                            
+                            <!-- Layout Mobile -->
+                            <div class="d-block d-lg-none">
+                              <div class="mobile-player-card" *ngFor="let calciatore of team.getTuttiGiocatori()">
+                                <div class="mobile-player-header">
+                                  <div class="player-main-info">
+                                    <span class="{{getRuoloClass(calciatore.codiceRuolo)}} ruolo-badge mobile">{{calciatore.codiceRuolo}}</span>
+                                    <div class="player-name-section">
+                                      <strong class="player-name">{{calciatore.nome}}</strong>
+                                      <span class="team-name mobile">({{calciatore.squadra}})</span>
+                                    </div>
+                                  </div>
+                                  <div class="player-actions-mobile">
+                                    <span class="player-price mobile">{{calciatore.prezzoAcquisto}} cr.</span>
+                                    <button mat-icon-button color="warn" (click)="onRemoveCalciatore(team, calciatore)" matTooltip="Rimuovi" size="small">
+                                      <mat-icon>delete</mat-icon>
+                                    </button>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
                           </div>
                         </mat-tab>
                         <mat-tab label="Portieri">
-                          <div class="player-item" *ngFor="let calciatore of team.getPortieri()">
-                            <div class="player-details">
-                              <span class="{{getRuoloClass(calciatore.codiceRuolo)}} ruolo-badge">{{calciatore.codiceRuolo}}</span>
-                              <strong>{{calciatore.nome}}</strong>
-                              <span class="team-name">({{calciatore.squadra}})</span>
-                              <span class="player-price">{{calciatore.prezzoAcquisto}} cr.</span>
+                          <div class="players-list-container">
+                            <!-- Layout Desktop -->
+                            <div class="d-none d-lg-block">
+                              <div class="player-item" *ngFor="let calciatore of team.getPortieri()">
+                                <div class="player-details">
+                                  <span class="{{getRuoloClass(calciatore.codiceRuolo)}} ruolo-badge">{{calciatore.codiceRuolo}}</span>
+                                  <strong>{{calciatore.nome}}</strong>
+                                  <span class="team-name">({{calciatore.squadra}})</span>
+                                  <span class="player-price">{{calciatore.prezzoAcquisto}} cr.</span>
+                                </div>
+                                <button mat-icon-button color="warn" (click)="onRemoveCalciatore(team, calciatore)" matTooltip="Rimuovi calciatore">
+                                  <mat-icon>delete</mat-icon>
+                                </button>
+                              </div>
                             </div>
-                            <button mat-icon-button color="warn" (click)="onRemoveCalciatore(team, calciatore)" matTooltip="Rimuovi calciatore">
-                              <mat-icon>delete</mat-icon>
-                            </button>
+                            
+                            <!-- Layout Mobile -->
+                            <div class="d-block d-lg-none">
+                              <div class="mobile-player-card" *ngFor="let calciatore of team.getPortieri()">
+                                <div class="mobile-player-header">
+                                  <div class="player-main-info">
+                                    <span class="{{getRuoloClass(calciatore.codiceRuolo)}} ruolo-badge mobile">{{calciatore.codiceRuolo}}</span>
+                                    <div class="player-name-section">
+                                      <strong class="player-name">{{calciatore.nome}}</strong>
+                                      <span class="team-name mobile">({{calciatore.squadra}})</span>
+                                    </div>
+                                  </div>
+                                  <div class="player-actions-mobile">
+                                    <span class="player-price mobile">{{calciatore.prezzoAcquisto}} cr.</span>
+                                    <button mat-icon-button color="warn" (click)="onRemoveCalciatore(team, calciatore)" matTooltip="Rimuovi" size="small">
+                                      <mat-icon>delete</mat-icon>
+                                    </button>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
                           </div>
                         </mat-tab>
                         <mat-tab label="Difensori">
-                          <div class="player-item" *ngFor="let calciatore of team.getDifensori()">
-                            <div class="player-details">
-                              <span class="{{getRuoloClass(calciatore.codiceRuolo)}} ruolo-badge">{{calciatore.codiceRuolo}}</span>
-                              <strong>{{calciatore.nome}}</strong>
-                              <span class="team-name">({{calciatore.squadra}})</span>
-                              <span class="player-price">{{calciatore.prezzoAcquisto}} cr.</span>
+                          <div class="players-list-container">
+                            <!-- Layout Desktop -->
+                            <div class="d-none d-lg-block">
+                              <div class="player-item" *ngFor="let calciatore of team.getDifensori()">
+                                <div class="player-details">
+                                  <span class="{{getRuoloClass(calciatore.codiceRuolo)}} ruolo-badge">{{calciatore.codiceRuolo}}</span>
+                                  <strong>{{calciatore.nome}}</strong>
+                                  <span class="team-name">({{calciatore.squadra}})</span>
+                                  <span class="player-price">{{calciatore.prezzoAcquisto}} cr.</span>
+                                </div>
+                                <button mat-icon-button color="warn" (click)="onRemoveCalciatore(team, calciatore)" matTooltip="Rimuovi calciatore">
+                                  <mat-icon>delete</mat-icon>
+                                </button>
+                              </div>
                             </div>
-                            <button mat-icon-button color="warn" (click)="onRemoveCalciatore(team, calciatore)" matTooltip="Rimuovi calciatore">
-                              <mat-icon>delete</mat-icon>
-                            </button>
+                            
+                            <!-- Layout Mobile -->
+                            <div class="d-block d-lg-none">
+                              <div class="mobile-player-card" *ngFor="let calciatore of team.getDifensori()">
+                                <div class="mobile-player-header">
+                                  <div class="player-main-info">
+                                    <span class="{{getRuoloClass(calciatore.codiceRuolo)}} ruolo-badge mobile">{{calciatore.codiceRuolo}}</span>
+                                    <div class="player-name-section">
+                                      <strong class="player-name">{{calciatore.nome}}</strong>
+                                      <span class="team-name mobile">({{calciatore.squadra}})</span>
+                                    </div>
+                                  </div>
+                                  <div class="player-actions-mobile">
+                                    <span class="player-price mobile">{{calciatore.prezzoAcquisto}} cr.</span>
+                                    <button mat-icon-button color="warn" (click)="onRemoveCalciatore(team, calciatore)" matTooltip="Rimuovi" size="small">
+                                      <mat-icon>delete</mat-icon>
+                                    </button>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
                           </div>
                         </mat-tab>
                         <mat-tab label="Centrocampisti">
-                          <div class="player-item" *ngFor="let calciatore of team.getCentrocampisti()">
-                            <div class="player-details">
-                              <span class="{{getRuoloClass(calciatore.codiceRuolo)}} ruolo-badge">{{calciatore.codiceRuolo}}</span>
-                              <strong>{{calciatore.nome}}</strong>
-                              <span class="team-name">({{calciatore.squadra}})</span>
-                              <span class="player-price">{{calciatore.prezzoAcquisto}} cr.</span>
+                          <div class="players-list-container">
+                            <!-- Layout Desktop -->
+                            <div class="d-none d-lg-block">
+                              <div class="player-item" *ngFor="let calciatore of team.getCentrocampisti()">
+                                <div class="player-details">
+                                  <span class="{{getRuoloClass(calciatore.codiceRuolo)}} ruolo-badge">{{calciatore.codiceRuolo}}</span>
+                                  <strong>{{calciatore.nome}}</strong>
+                                  <span class="team-name">({{calciatore.squadra}})</span>
+                                  <span class="player-price">{{calciatore.prezzoAcquisto}} cr.</span>
+                                </div>
+                                <button mat-icon-button color="warn" (click)="onRemoveCalciatore(team, calciatore)" matTooltip="Rimuovi calciatore">
+                                  <mat-icon>delete</mat-icon>
+                                </button>
+                              </div>
                             </div>
-                            <button mat-icon-button color="warn" (click)="onRemoveCalciatore(team, calciatore)" matTooltip="Rimuovi calciatore">
-                              <mat-icon>delete</mat-icon>
-                            </button>
+                            
+                            <!-- Layout Mobile -->
+                            <div class="d-block d-lg-none">
+                              <div class="mobile-player-card" *ngFor="let calciatore of team.getCentrocampisti()">
+                                <div class="mobile-player-header">
+                                  <div class="player-main-info">
+                                    <span class="{{getRuoloClass(calciatore.codiceRuolo)}} ruolo-badge mobile">{{calciatore.codiceRuolo}}</span>
+                                    <div class="player-name-section">
+                                      <strong class="player-name">{{calciatore.nome}}</strong>
+                                      <span class="team-name mobile">({{calciatore.squadra}})</span>
+                                    </div>
+                                  </div>
+                                  <div class="player-actions-mobile">
+                                    <span class="player-price mobile">{{calciatore.prezzoAcquisto}} cr.</span>
+                                    <button mat-icon-button color="warn" (click)="onRemoveCalciatore(team, calciatore)" matTooltip="Rimuovi" size="small">
+                                      <mat-icon>delete</mat-icon>
+                                    </button>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
                           </div>
                         </mat-tab>
                         <mat-tab label="Attaccanti">
-                          <div class="player-item" *ngFor="let calciatore of team.getAttaccanti()">
-                            <div class="player-details">
-                              <span class="{{getRuoloClass(calciatore.codiceRuolo)}} ruolo-badge">{{calciatore.codiceRuolo}}</span>
-                              <strong>{{calciatore.nome}}</strong>
-                              <span class="team-name">({{calciatore.squadra}})</span>
-                              <span class="player-price">{{calciatore.prezzoAcquisto}} cr.</span>
+                          <div class="players-list-container">
+                            <!-- Layout Desktop -->
+                            <div class="d-none d-lg-block">
+                              <div class="player-item" *ngFor="let calciatore of team.getAttaccanti()">
+                                <div class="player-details">
+                                  <span class="{{getRuoloClass(calciatore.codiceRuolo)}} ruolo-badge">{{calciatore.codiceRuolo}}</span>
+                                  <strong>{{calciatore.nome}}</strong>
+                                  <span class="team-name">({{calciatore.squadra}})</span>
+                                  <span class="player-price">{{calciatore.prezzoAcquisto}} cr.</span>
+                                </div>
+                                <button mat-icon-button color="warn" (click)="onRemoveCalciatore(team, calciatore)" matTooltip="Rimuovi calciatore">
+                                  <mat-icon>delete</mat-icon>
+                                </button>
+                              </div>
                             </div>
-                            <button mat-icon-button color="warn" (click)="onRemoveCalciatore(team, calciatore)" matTooltip="Rimuovi calciatore">
-                              <mat-icon>delete</mat-icon>
-                            </button>
+                            
+                            <!-- Layout Mobile -->
+                            <div class="d-block d-lg-none">
+                              <div class="mobile-player-card" *ngFor="let calciatore of team.getAttaccanti()">
+                                <div class="mobile-player-header">
+                                  <div class="player-main-info">
+                                    <span class="{{getRuoloClass(calciatore.codiceRuolo)}} ruolo-badge mobile">{{calciatore.codiceRuolo}}</span>
+                                    <div class="player-name-section">
+                                      <strong class="player-name">{{calciatore.nome}}</strong>
+                                      <span class="team-name mobile">({{calciatore.squadra}})</span>
+                                    </div>
+                                  </div>
+                                  <div class="player-actions-mobile">
+                                    <span class="player-price mobile">{{calciatore.prezzoAcquisto}} cr.</span>
+                                    <button mat-icon-button color="warn" (click)="onRemoveCalciatore(team, calciatore)" matTooltip="Rimuovi" size="small">
+                                      <mat-icon>delete</mat-icon>
+                                    </button>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
                           </div>
                         </mat-tab>
                       </mat-tab-group>

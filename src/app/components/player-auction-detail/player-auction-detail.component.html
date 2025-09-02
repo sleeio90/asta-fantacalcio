@@ -25,8 +25,9 @@
     </mat-expansion-panel-header>
     
     <div class="expansion-content">
-      <div class="auctions-grid">
-        <mat-card class="auction-card" *ngFor="let auction of auctions; trackBy: trackByAuctionId">
+      <div class="auctions-grid row">
+        <div class="col-12 col-lg-6" *ngFor="let auction of auctions; trackBy: trackByAuctionId">
+          <mat-card class="auction-card">
         <mat-card-header>
           <mat-card-title>{{ auction.nome }}</mat-card-title>
           <mat-card-subtitle>
@@ -93,7 +94,8 @@
             </button>
           </div>
         </mat-card-content>
-      </mat-card>
+        </mat-card>
+        </div>
       </div>
     </div>
   </mat-expansion-panel>
