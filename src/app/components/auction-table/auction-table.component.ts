@@ -1,5 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
+import { MatDialog } from '@angular/material/dialog';
 import { AstaService } from '../../services/asta.service';
 import { AuthService, UserProfile } from '../../services/auth.service';
 import { NotificationsService } from '../../services/notifications.service';
@@ -8,6 +9,7 @@ import { Team } from '../../models/team.model';
 import { Calciatore } from '../../models/calciatore.model';
 import { Subscription } from 'rxjs';
 import { distinctUntilChanged, take } from 'rxjs/operators';
+import { PlayerActionDialogComponent, PlayerActionDialogData, PlayerActionDialogResult } from '../player-action-dialog/player-action-dialog.component';
 
 @Component({
   selector: 'app-auction-table',
@@ -19,6 +21,8 @@ export class AuctionTableComponent implements OnInit, OnDestroy {
   teams: Team[] = [];
   selectedTeam: Team | null = null;
   ruoli = ['P', 'D', 'C', 'A'];
+  viewMode: 'horizontal' | 'vertical' = 'vertical';
+  currentUser: UserProfile | null = null;
   private astaSubscription: Subscription | null = null;
 
   constructor(
@@ -26,10 +30,16 @@ export class AuctionTableComponent implements OnInit, OnDestroy {
     private authService: AuthService,
     private notificationsService: NotificationsService,
     private router: Router,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private dialog: MatDialog
   ) { }
 
   ngOnInit(): void {
+    // Recupera l'utente corrente
+    this.authService.user$.pipe(take(1)).subscribe(user => {
+      this.currentUser = user;
+    });
+    
     // Controlla se c'è un ID asta nell'URL
     this.route.params.subscribe(params => {
       const astaId = params['astaId'];
@@ -242,5 +252,167 @@ export class AuctionTableComponent implements OnInit, OnDestroy {
   
   getTotaleSpesoPorRuolo(team: Team, ruolo: string): number {
     return team.getTotaleSpesoPorRuolo(ruolo);
+  }
+  
+  // Metodo per ottenere le prime 3 lettere del nome team in maiuscolo
+  getTeamAbbreviation(teamName: string): string {
+    return teamName.substring(0, 3).toUpperCase();
+  }
+  
+  // Metodo per abbreviare il nome della squadra del calciatore
+  getSquadraAbbreviation(squadra: string): string {
+    const abbreviations: { [key: string]: string } = {
+      'Juventus': 'JUV',
+      'Inter': 'INT', 
+      'Milan': 'MIL',
+      'Napoli': 'NAP',
+      'Roma': 'ROM',
+      'Lazio': 'LAZ',
+      'Atalanta': 'ATA',
+      'Fiorentina': 'FIO',
+      'Bologna': 'BOL',
+      'Torino': 'TOR',
+      'Genoa': 'GEN',
+      'Sampdoria': 'SAM',
+      'Sassuolo': 'SAS',
+      'Udinese': 'UDI',
+      'Verona': 'VER',
+      'Spezia': 'SPE',
+      'Cagliari': 'CAG',
+      'Venezia': 'VEN',
+      'Empoli': 'EMP',
+      'Salernitana': 'SAL',
+      'Cremonese': 'CRE',
+      'Lecce': 'LEC',
+      'Monza': 'MON',
+      'Frosinone': 'FRO'
+    };
+    
+    return abbreviations[squadra] || squadra.substring(0, 3).toUpperCase();
+  }
+  
+  // Gestione cambio visualizzazione
+  onViewModeChange(event: any): void {
+    this.viewMode = event.value;
+  }
+  
+  // Metodi per la gestione dei calciatori in visualizzazione verticale
+  canEditPlayer(team: Team): boolean {
+    return this.currentUser?.uid === team.userId || this.currentUser?.role === 'admin';
+  }
+  
+  onEditPlayer(calciatore: Calciatore, team: Team): void {
+    if (!this.canEditPlayer(team)) {
+      this.notificationsService.showWarning('Non puoi modificare calciatori di altri team');
+      return;
+    }
+    
+    // Implementazione per modificare il prezzo del calciatore
+    const newPrice = prompt(`Modifica prezzo per ${calciatore.nome}:`, calciatore.prezzoAcquisto?.toString() || '0');
+    if (newPrice !== null && !isNaN(Number(newPrice))) {
+      const price = Number(newPrice);
+      if (price >= 0) {
+        this.updatePlayerPrice(calciatore, team, price);
+      } else {
+        this.notificationsService.showWarning('Il prezzo deve essere maggiore o uguale a 0');
+      }
+    }
+  }
+  
+  onRemovePlayer(calciatore: Calciatore, team: Team): void {
+    if (!this.canEditPlayer(team)) {
+      this.notificationsService.showWarning('Non puoi rimuovere calciatori di altri team');
+      return;
+    }
+    
+    if (confirm(`Vuoi davvero rimuovere ${calciatore.nome} dal team ${team.nome}?`)) {
+      this.removePlayerFromTeam(calciatore, team);
+    }
+  }
+  
+  private removePlayerFromTeam(calciatore: Calciatore, team: Team): void {
+    if (!this.asta) return;
+    
+    // Rimuovi il calciatore dal team
+    const index = team.calciatori.findIndex(c => c.id === calciatore.id);
+    if (index > -1) {
+      team.calciatori.splice(index, 1);
+      
+      // Restituisci i crediti al team
+      if (calciatore.prezzoAcquisto) {
+        team.budget += calciatore.prezzoAcquisto;
+      }
+      
+      // Salva le modifiche
+      this.astaService.updateAsta(this.asta).subscribe({
+        next: () => {
+          this.notificationsService.showSuccess(`${calciatore.nome} rimosso dal team ${team.nome}`);
+        },
+        error: (error) => {
+          console.error('Errore rimozione calciatore:', error);
+          this.notificationsService.showError('Errore durante la rimozione del calciatore');
+          // Ripristina il calciatore in caso di errore
+          team.calciatori.splice(index, 0, calciatore);
+          if (calciatore.prezzoAcquisto) {
+            team.budget -= calciatore.prezzoAcquisto;
+          }
+        }
+      });
+    }
+  }
+
+  openPlayerDialog(calciatore: Calciatore, team: Team): void {
+    const dialogRef = this.dialog.open(PlayerActionDialogComponent, {
+      width: '450px',
+      data: {
+        calciatore: calciatore,
+        team: team
+      } as PlayerActionDialogData,
+      disableClose: false,
+      autoFocus: true
+    });
+
+    dialogRef.afterClosed().subscribe((result: PlayerActionDialogResult) => {
+      if (result && result.action !== 'cancel') {
+        if (result.action === 'edit' && result.newPrice) {
+          // Modifica prezzo
+          this.updatePlayerPrice(calciatore, team, result.newPrice);
+        } else if (result.action === 'delete') {
+          // Elimina giocatore
+          this.onRemovePlayer(calciatore, team);
+        }
+      }
+    });
+  }
+
+  private updatePlayerPrice(calciatore: Calciatore, team: Team, newPrice: number): void {
+    if (!this.asta) return;
+
+    const oldPrice = calciatore.prezzoAcquisto || 0;
+    const priceDifference = newPrice - oldPrice;
+
+    // Verifica se il team ha budget sufficiente per l'aumento
+    if (priceDifference > 0 && team.budget < priceDifference) {
+      this.notificationsService.showError('Budget insufficiente per questo prezzo');
+      return;
+    }
+
+    // Aggiorna il prezzo e il budget
+    calciatore.prezzoAcquisto = newPrice;
+    team.budget -= priceDifference;
+
+    // Salva le modifiche
+    this.astaService.updateAsta(this.asta).subscribe({
+      next: () => {
+        this.notificationsService.showSuccess(`Prezzo di ${calciatore.nome} aggiornato a ${newPrice} crediti`);
+      },
+      error: (error) => {
+        console.error('Errore aggiornamento prezzo:', error);
+        this.notificationsService.showError('Errore durante l\'aggiornamento del prezzo');
+        // Ripristina i valori in caso di errore
+        calciatore.prezzoAcquisto = oldPrice;
+        team.budget += priceDifference;
+      }
+    });
   }
 }

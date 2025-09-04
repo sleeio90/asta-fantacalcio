@@ -23,6 +23,7 @@ import { AuctionTableComponent } from './components/auction-table/auction-table.
 import { TeamDetailComponent } from './components/team-detail/team-detail.component';
 import { PlayerAuctionDetailComponent } from './components/player-auction-detail/player-auction-detail.component';
 import { EmailVerificationComponent } from './components/email-verification/email-verification.component';
+import { PlayerActionDialogComponent } from './components/player-action-dialog/player-action-dialog.component';
 
 // Material Modules
 import { MatButtonModule } from '@angular/material/button';
@@ -47,6 +48,7 @@ import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatDividerModule } from '@angular/material/divider';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { ClipboardModule } from '@angular/cdk/clipboard';
 
 @NgModule({
@@ -63,7 +65,8 @@ import { ClipboardModule } from '@angular/cdk/clipboard';
     AuctionTableComponent,
     TeamDetailComponent,
     PlayerAuctionDetailComponent,
-    EmailVerificationComponent
+    EmailVerificationComponent,
+    PlayerActionDialogComponent
   ],
   imports: [
     BrowserModule,
@@ -97,6 +100,7 @@ import { ClipboardModule } from '@angular/cdk/clipboard';
     MatChipsModule,
     MatProgressBarModule,
     MatDividerModule,
+    MatButtonToggleModule,
     ClipboardModule
   ],
   providers: [],

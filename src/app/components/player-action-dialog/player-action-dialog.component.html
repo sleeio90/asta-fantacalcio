@@ -1,0 +1,67 @@
+<div class="player-dialog">
+  <h2 mat-dialog-title>
+    <mat-icon>person</mat-icon>
+    {{ data.calciatore.nome }}
+  </h2>
+  
+  <mat-dialog-content>
+    <div class="player-info">
+      <div class="info-item">
+        <span class="label">Squadra:</span>
+        <span class="value">{{ data.calciatore.squadra }}</span>
+      </div>
+      <div class="info-item">
+        <span class="label">Ruolo:</span>
+        <span class="value">{{ data.calciatore.codiceRuolo }}</span>
+      </div>
+      <div class="info-item">
+        <span class="label">Team:</span>
+        <span class="value">{{ data.team.nome }}</span>
+      </div>
+      <div class="info-item">
+        <span class="label">Prezzo attuale:</span>
+        <span class="value current-price">{{ data.calciatore.prezzoAcquisto || 0 }} cr</span>
+      </div>
+    </div>
+    
+    <div class="price-section">
+      <mat-form-field appearance="outline" class="price-input">
+        <mat-label>Nuovo prezzo</mat-label>
+        <input matInput 
+               type="number" 
+               [(ngModel)]="newPrice" 
+               min="1" 
+               max="500"
+               placeholder="Inserisci il prezzo">
+      </mat-form-field>
+    </div>
+  </mat-dialog-content>
+  
+  <mat-dialog-actions align="center">
+    <div class="action-buttons">
+      <button mat-raised-button 
+              color="primary" 
+              (click)="onEditPrice()"
+              [disabled]="!newPrice || newPrice <= 0"
+              class="edit-btn">
+        <mat-icon>edit</mat-icon>
+        Modifica Prezzo
+      </button>
+      
+      <button mat-raised-button 
+              color="warn" 
+              (click)="onDelete()"
+              class="delete-btn">
+        <mat-icon>delete</mat-icon>
+        Elimina Giocatore
+      </button>
+      
+      <button mat-button 
+              (click)="onCancel()"
+              class="cancel-btn">
+        <mat-icon>close</mat-icon>
+        Annulla
+      </button>
+    </div>
+  </mat-dialog-actions>
+</div>

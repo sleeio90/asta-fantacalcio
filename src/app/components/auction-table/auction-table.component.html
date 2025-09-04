@@ -5,6 +5,20 @@
       <mat-icon>arrow_back</mat-icon>
       Torna alla Home
     </button>
+    
+    <!-- Toggle per visualizzazione -->
+    <div class="view-toggle">
+      <mat-button-toggle-group [(value)]="viewMode" (change)="onViewModeChange($event)">
+        <mat-button-toggle value="vertical">
+          <mat-icon>view_module</mat-icon>
+          Verticale
+        </mat-button-toggle>
+        <mat-button-toggle value="horizontal">
+          <mat-icon>view_list</mat-icon>
+          Orizzontale
+        </mat-button-toggle>
+      </mat-button-toggle-group>
+    </div>
   </div>
 
   <mat-card>
@@ -16,61 +30,59 @@
     <mat-card-content>
       <mat-tab-group>
         <mat-tab label="Tutti i Team">
-          <div class="teams-container">
-            <!-- Header per desktop -->
-            <div class="row mt-3 team-header d-none d-md-flex">
-              <div class="col-md-3">
-                <h3>Team</h3>
-              </div>
-              <div class="col-md-9">
-                <div class="row ruoli-header">
-                  <div class="col-md-3 text-center" *ngFor="let ruolo of ruoli">
-                    <h4 [ngClass]="'ruolo-' + (ruolo === 'P' ? 'portiere' : ruolo === 'D' ? 'difensore' : ruolo === 'C' ? 'centrocampista' : 'attaccante')">
-                      {{ getNomeRuolo(ruolo) }}
-                    </h4>
-                  </div>
-                </div>
-              </div>
-            </div>
+          
+          <!-- Visualizzazione Orizzontale (esistente) -->
+          <div class="teams-container" *ngIf="viewMode === 'horizontal'">
 
             <div *ngFor="let team of teams" class="team-row mt-3">
               <!-- Layout Desktop -->
               <div class="row d-none d-md-flex">
-                <div class="col-md-3" (click)="goToTeamDetail(team)" style="cursor: pointer;">
-                  <div class="team-info">
+                <div class="col-md-3">
+                  <div class="team-info" [ngClass]="{'my-team': canEditPlayer(team)}">
                     <h5>{{ team.nome }}</h5>
-                    <div [ngClass]="getBudgetClass(team)">
-                      Budget: {{ team.budget }} / {{ team.budgetIniziale }}
-                    </div>
-                    <div>
-                      Speso: {{ getTotaleSpeso(team) }}
+                    <div class="team-budget-info">
+                      <div class="budget-item crediti-residui">
+                        <span class="label">Residui:</span>
+                        <span class="value" [ngClass]="getBudgetClass(team)">{{ team.budget }}</span>
+                      </div>
+                      <div class="budget-item crediti-spesi">
+                        <span class="label">Spesi:</span>
+                        <span class="value">{{ getTotaleSpeso(team) }}</span>
+                      </div>
                     </div>
                   </div>
                 </div>
                 <div class="col-md-9">
                   <div class="row">
                     <div class="col-md-3" *ngFor="let ruolo of ruoli">
-                      <div class="ruolo-container" [ngClass]="'ruolo-' + (ruolo === 'P' ? 'portiere' : ruolo === 'D' ? 'difensore' : ruolo === 'C' ? 'centrocampista' : 'attaccante')">
-                        <div class="ruolo-header">
-                          <div class="ruolo-count">
-                            {{ countCalciatori(team, ruolo) }}
+                      <div class="horizontal-ruolo-container" [ngClass]="'container-' + (ruolo === 'P' ? 'portiere' : ruolo === 'D' ? 'difensore' : ruolo === 'C' ? 'centrocampista' : 'attaccante')">
+                        <!-- Header del ruolo -->
+                        <h4 class="horizontal-ruolo-title" [ngClass]="'ruolo-' + (ruolo === 'P' ? 'portiere' : ruolo === 'D' ? 'difensore' : ruolo === 'C' ? 'centrocampista' : 'attaccante')">
+                          <div class="ruolo-info-left">
+                            <span class="ruolo-icon">{{ ruolo === 'P' ? '🥅' : ruolo === 'D' ? '🛡️' : ruolo === 'C' ? '⚽' : '🎯' }}</span>
+                            <span class="ruolo-text">{{ ruolo }} ({{ countCalciatori(team, ruolo) }})</span>
                           </div>
-                          <div class="ruolo-totale">
-                            Totale: {{ getTotaleSpesoPorRuolo(team, ruolo) }}
+                          <span class="ruolo-totale">{{ getTotaleSpesoPorRuolo(team, ruolo) }}cr</span>
+                        </h4>
+                        
+                        <!-- Lista calciatori -->
+                        <div class="horizontal-players-list">
+                          <div *ngFor="let calciatore of getCalciatoriByRuolo(team, ruolo)" class="horizontal-player-item">
+                            <div class="player-info">
+                              <span class="player-name">{{ calciatore.nome }} ({{ getSquadraAbbreviation(calciatore.squadra) }})</span>
+                            </div>
+                            <div class="player-actions">
+                              <span class="player-price">{{ calciatore.prezzoAcquisto || 0 }}cr</span>
+                              <button mat-icon-button *ngIf="canEditPlayer(team)" 
+                                      (click)="openPlayerDialog(calciatore, team)" 
+                                      matTooltip="Modifica giocatore" 
+                                      class="action-btn">
+                                <mat-icon>add</mat-icon>
+                              </button>
+                            </div>
                           </div>
-                        </div>
-                        <div class="calciatori-list" style="color: #333;">
-                          <div *ngFor="let calciatore of getCalciatoriByRuolo(team, ruolo)" class="calciatore-single-row">
-                            <span class="calciatore-nome">
-                              <span class="ruolo-pallino" [ngClass]="'ruolo-' + (calciatore.codiceRuolo === 'P' ? 'portiere' : calciatore.codiceRuolo === 'D' ? 'difensore' : calciatore.codiceRuolo === 'C' ? 'centrocampista' : 'attaccante')">{{ calciatore.codiceRuolo }}</span>
-                              {{ calciatore.nome }}
-                            </span>
-                            <span class="calciatore-squadra">({{ calciatore.squadra }})</span>
-                            <span class="calciatore-prezzo">{{ calciatore.prezzoAcquisto }}</span>
-                          </div>
-                          
-                          <div *ngIf="getCalciatoriByRuolo(team, ruolo).length === 0" class="calciatore-empty">
-                            Nessun calciatore
+                          <div *ngIf="getCalciatoriByRuolo(team, ruolo).length === 0" class="empty-ruolo">
+                            Nessun {{ ruolo === 'P' ? 'portiere' : ruolo === 'D' ? 'difensore' : ruolo === 'C' ? 'centrocampista' : 'attaccante' }}
                           </div>
                         </div>
                       </div>
@@ -81,7 +93,7 @@
 
               <!-- Layout Mobile -->
               <div class="mobile-team-layout d-block d-md-none">
-                <div class="mobile-team-header" (click)="goToTeamDetail(team)" style="cursor: pointer;">
+                <div class="mobile-team-header">
                   <h5>{{ team.nome }}</h5>
                   <div class="mobile-team-stats">
                     <span [ngClass]="getBudgetClass(team)">Budget: {{ team.budget }}/{{ team.budgetIniziale }}</span>
@@ -99,7 +111,7 @@
                       <div *ngFor="let calciatore of getCalciatoriByRuolo(team, ruolo)" class="mobile-calciatore-item">
                         <span class="ruolo-pallino" [ngClass]="'ruolo-' + (calciatore.codiceRuolo === 'P' ? 'portiere' : calciatore.codiceRuolo === 'D' ? 'difensore' : calciatore.codiceRuolo === 'C' ? 'centrocampista' : 'attaccante')">{{ calciatore.codiceRuolo }}</span>
                         <span class="calciatore-nome">{{ calciatore.nome }}</span>
-                        <span class="calciatore-squadra">({{ calciatore.squadra }})</span>
+                        <span class="calciatore-squadra">({{ getSquadraAbbreviation(calciatore.squadra) }})</span>
                         <span class="calciatore-prezzo">{{ calciatore.prezzoAcquisto }}cr</span>
                       </div>
                       <div *ngIf="getCalciatoriByRuolo(team, ruolo).length === 0" class="mobile-calciatore-empty">
@@ -108,13 +120,184 @@
                     </div>
                   </div>
                 </div>
+                
+                <!-- Footer Mobile -->
+                <div class="mobile-team-footer">
+                  <div class="mobile-team-stats">
+                    <span [ngClass]="getBudgetClass(team)">Budget: {{ team.budget }}/{{ team.budgetIniziale }}</span>
+                    <span class="speso">Speso: {{ getTotaleSpeso(team) }}</span>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
-        </mat-tab>
-        
-        <mat-tab *ngFor="let team of teams" [label]="team.nome">
-          <app-team-detail [teamNome]="team.nome" [asta]="asta"></app-team-detail>
+          
+          <!-- Visualizzazione Verticale (nuova) -->
+          <div class="teams-vertical-container" *ngIf="viewMode === 'vertical'">
+            <div class="vertical-teams-grid">
+              <div class="vertical-team-card" *ngFor="let team of teams">
+                <!-- Header del team -->
+                <div class="vertical-team-header" [ngClass]="{'my-team': canEditPlayer(team)}">
+                  <div class="team-info-vertical">
+                    <h3 class="team-name">
+                      {{ team.nome }}
+                    </h3>
+                    <div class="team-budget-info">
+                      <div class="budget-item crediti-residui">
+                        <span class="label">Residui:</span>
+                        <span class="value" [ngClass]="getBudgetClass(team)">{{ team.budget }}</span>
+                      </div>
+                      <div class="budget-item crediti-spesi">
+                        <span class="label">Spesi:</span>
+                        <span class="value">{{ getTotaleSpeso(team) }}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- Lista calciatori per ruolo -->
+                <div class="vertical-players-container">
+                  <!-- Portieri -->
+                  <div class="vertical-ruolo-section">
+                    <h4 class="ruolo-title ruolo-portiere">
+                      <div class="ruolo-info-left">
+                        <span class="ruolo-icon">🥅</span>
+                        <span class="ruolo-text">P ({{ getCalciatoriByRuolo(team, 'P').length }}/3)</span>
+                      </div>
+                      <span class="ruolo-totale">{{ getTotaleSpesoPorRuolo(team, 'P') }}cr</span>
+                    </h4>
+                    <div class="vertical-players-list">
+                      <div class="vertical-player-item" *ngFor="let calciatore of getCalciatoriByRuolo(team, 'P')">
+                        <div class="player-info">
+                          <span class="player-name">{{ calciatore.nome }}</span>
+                          <span class="player-team">({{ getSquadraAbbreviation(calciatore.squadra) }})</span>
+                        </div>
+                        <div class="player-actions">
+                          <span class="player-price">{{ calciatore.prezzoAcquisto || 0 }}cr</span>
+                          <button mat-icon-button *ngIf="canEditPlayer(team)" 
+                                  (click)="openPlayerDialog(calciatore, team)" 
+                                  matTooltip="Modifica giocatore" 
+                                  class="action-btn">
+                            <mat-icon>add</mat-icon>
+                          </button>
+                        </div>
+                      </div>
+                      <div class="empty-ruolo" *ngIf="getCalciatoriByRuolo(team, 'P').length === 0">
+                        Nessun portiere
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <!-- Difensori -->
+                  <div class="vertical-ruolo-section">
+                    <h4 class="ruolo-title ruolo-difensore">
+                      <div class="ruolo-info-left">
+                        <span class="ruolo-icon">🛡️</span>
+                        <span class="ruolo-text">D ({{ getCalciatoriByRuolo(team, 'D').length }}/8)</span>
+                      </div>
+                      <span class="ruolo-totale">{{ getTotaleSpesoPorRuolo(team, 'D') }}cr</span>
+                    </h4>
+                    <div class="vertical-players-list">
+                      <div class="vertical-player-item" *ngFor="let calciatore of getCalciatoriByRuolo(team, 'D')">
+                        <div class="player-info">
+                          <span class="player-name">{{ calciatore.nome }}</span>
+                          <span class="player-team">({{ getSquadraAbbreviation(calciatore.squadra) }})</span>
+                        </div>
+                        <div class="player-actions">
+                          <span class="player-price">{{ calciatore.prezzoAcquisto || 0 }}cr</span>
+                          <button mat-icon-button *ngIf="canEditPlayer(team)" 
+                                  (click)="openPlayerDialog(calciatore, team)" 
+                                  matTooltip="Modifica giocatore" 
+                                  class="action-btn">
+                            <mat-icon>add</mat-icon>
+                          </button>
+                        </div>
+                      </div>
+                      <div class="empty-ruolo" *ngIf="getCalciatoriByRuolo(team, 'D').length === 0">
+                        Nessun difensore
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <!-- Centrocampisti -->
+                  <div class="vertical-ruolo-section">
+                    <h4 class="ruolo-title ruolo-centrocampista">
+                      <div class="ruolo-info-left">
+                        <span class="ruolo-icon">⚽</span>
+                        <span class="ruolo-text">C ({{ getCalciatoriByRuolo(team, 'C').length }}/8)</span>
+                      </div>
+                      <span class="ruolo-totale">{{ getTotaleSpesoPorRuolo(team, 'C') }}cr</span>
+                    </h4>
+                    <div class="vertical-players-list">
+                      <div class="vertical-player-item" *ngFor="let calciatore of getCalciatoriByRuolo(team, 'C')">
+                        <div class="player-info">
+                          <span class="player-name">{{ calciatore.nome }}</span>
+                          <span class="player-team">({{ getSquadraAbbreviation(calciatore.squadra) }})</span>
+                        </div>
+                        <div class="player-actions">
+                          <span class="player-price">{{ calciatore.prezzoAcquisto || 0 }}cr</span>
+                          <button mat-icon-button *ngIf="canEditPlayer(team)" 
+                                  (click)="openPlayerDialog(calciatore, team)" 
+                                  matTooltip="Modifica giocatore" 
+                                  class="action-btn">
+                            <mat-icon>add</mat-icon>
+                          </button>
+                        </div>
+                      </div>
+                      <div class="empty-ruolo" *ngIf="getCalciatoriByRuolo(team, 'C').length === 0">
+                        Nessun centrocampista
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <!-- Attaccanti -->
+                  <div class="vertical-ruolo-section">
+                    <h4 class="ruolo-title ruolo-attaccante">
+                      <div class="ruolo-info-left">
+                        <span class="ruolo-icon">🎯</span>
+                        <span class="ruolo-text">A ({{ getCalciatoriByRuolo(team, 'A').length }}/6)</span>
+                      </div>
+                      <span class="ruolo-totale">{{ getTotaleSpesoPorRuolo(team, 'A') }}cr</span>
+                    </h4>
+                    <div class="vertical-players-list">
+                      <div class="vertical-player-item" *ngFor="let calciatore of getCalciatoriByRuolo(team, 'A')">
+                        <div class="player-info">
+                          <span class="player-name">{{ calciatore.nome }}</span>
+                          <span class="player-team">({{ getSquadraAbbreviation(calciatore.squadra) }})</span>
+                        </div>
+                        <div class="player-actions">
+                          <span class="player-price">{{ calciatore.prezzoAcquisto || 0 }}cr</span>
+                          <button mat-icon-button *ngIf="canEditPlayer(team)" 
+                                  (click)="openPlayerDialog(calciatore, team)" 
+                                  matTooltip="Modifica giocatore" 
+                                  class="action-btn">
+                            <mat-icon>add</mat-icon>
+                          </button>
+                        </div>
+                      </div>
+                      <div class="empty-ruolo" *ngIf="getCalciatoriByRuolo(team, 'A').length === 0">
+                        Nessun attaccante
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- Footer del team -->
+                <div class="vertical-team-footer" [ngClass]="{'my-team': canEditPlayer(team)}">
+                  <div class="team-budget-info footer-style">
+                    <div class="budget-item crediti-residui">
+                      <span class="label">Residui:</span>
+                      <span class="value" [ngClass]="getBudgetClass(team)">{{ team.budget }}</span>
+                    </div>
+                    <div class="budget-item crediti-spesi">
+                      <span class="label">Spesi:</span>
+                      <span class="value">{{ getTotaleSpeso(team) }}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </mat-tab>
       </mat-tab-group>
     </mat-card-content>
