@@ -15,6 +15,8 @@ export class AppComponent implements OnInit {
   title = 'asta-fantacalcio';
   user$: Observable<UserProfile | null>;
   authLoading$: Observable<boolean>;
+  isEmailVerified = false;
+  shouldShowVerificationBanner = true;
   
   constructor(
     private authService: AuthService,
@@ -27,7 +29,22 @@ export class AppComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    // Component initialization
+    // Monitor email verification status
+    this.user$.subscribe(user => {
+      if (user) {
+        this.isEmailVerified = this.authService.isEmailVerified();
+        
+        // If email is verified, clear the dismissed banner flag
+        if (this.isEmailVerified) {
+          localStorage.removeItem('emailVerificationBannerDismissed');
+          this.shouldShowVerificationBanner = false;
+        } else {
+          // Check if banner was dismissed only if email is not verified
+          const dismissed = localStorage.getItem('emailVerificationBannerDismissed');
+          this.shouldShowVerificationBanner = !dismissed;
+        }
+      }
+    });
   }
 
   async logout(): Promise<void> {
@@ -180,6 +197,16 @@ export class AppComponent implements OnInit {
   navigateToHome(): void {
     console.log('Navigating to home...');
     this.router.navigate(['/home']);
+  }
+
+  goToEmailVerification(): void {
+    this.router.navigate(['/email-verification']);
+  }
+
+  dismissVerificationBanner(): void {
+    this.shouldShowVerificationBanner = false;
+    // Save dismissal in localStorage so it doesn't show again until next login
+    localStorage.setItem('emailVerificationBannerDismissed', 'true');
   }
 }
 

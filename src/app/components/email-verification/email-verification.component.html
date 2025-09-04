@@ -1,0 +1,88 @@
+<div class="email-verification-container">
+  <div class="verification-card">
+    <div class="card-header">
+      <h2>Verifica Email</h2>
+    </div>
+
+    <!-- Loading State -->
+    <div *ngIf="loading" class="loading-container">
+      <div class="spinner"></div>
+      <p>Verifica in corso...</p>
+    </div>
+
+    <!-- Pending Verification -->
+    <div *ngIf="!loading && verificationStatus === 'pending'" class="pending-container">
+      <div class="icon-container">
+        <i class="material-icons warning-icon">mail_outline</i>
+      </div>
+      <h3>Verifica la tua email</h3>
+      <p>Abbiamo inviato un'email di verifica a:</p>
+      <p class="email-address">{{ userEmail }}</p>
+      <p>Clicca sul link nell'email per verificare il tuo account.</p>
+      
+      <div class="actions">
+        <button mat-raised-button color="primary" (click)="resendVerificationEmail()" 
+                [disabled]="isResending">
+          <span *ngIf="!isResending">Invia di nuovo</span>
+          <span *ngIf="isResending">Invio in corso...</span>
+        </button>
+        <button mat-button (click)="checkVerificationStatus()">
+          Controlla stato
+        </button>
+      </div>
+
+      <div class="help-text">
+        <p>Non hai ricevuto l'email?</p>
+        <ul>
+          <li>Controlla la cartella spam/posta indesiderata</li>
+          <li>Assicurati che l'indirizzo email sia corretto</li>
+          <li>Clicca su "Invia di nuovo" per ricevere una nuova email</li>
+          <li>Le email possono impiegare fino a 5 minuti per arrivare</li>
+        </ul>
+      </div>
+
+      <div class="footer-actions">
+        <button mat-stroked-button (click)="goToHome()">
+          Continua senza verifica
+        </button>
+        <button mat-button color="warn" (click)="logout()">
+          Logout
+        </button>
+      </div>
+    </div>
+
+    <!-- Success State -->
+    <div *ngIf="!loading && verificationStatus === 'success'" class="success-container">
+      <div class="icon-container">
+        <i class="material-icons success-icon">check_circle</i>
+      </div>
+      <h3>Email verificata!</h3>
+      <p>La tua email è stata verificata con successo.</p>
+      <p>Sarai reindirizzato alla home page...</p>
+      
+      <div class="actions">
+        <button mat-raised-button color="primary" (click)="goToHome()">
+          Vai alla Home
+        </button>
+      </div>
+    </div>
+
+    <!-- Error State -->
+    <div *ngIf="!loading && verificationStatus === 'error'" class="error-container">
+      <div class="icon-container">
+        <i class="material-icons error-icon">error</i>
+      </div>
+      <h3>Errore di verifica</h3>
+      <p class="error-message">{{ errorMessage }}</p>
+      
+      <div class="actions">
+        <button mat-raised-button color="primary" (click)="resendVerificationEmail()">
+          Invia nuova email
+        </button>
+        <button mat-button (click)="goToHome()">
+          Vai alla Home
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

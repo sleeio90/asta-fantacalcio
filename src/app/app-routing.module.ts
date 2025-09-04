@@ -5,6 +5,7 @@ import { LoginComponent } from './components/login/login.component';
 import { AuctionTableComponent } from './components/auction-table/auction-table.component';
 import { TeamDetailComponent } from './components/team-detail/team-detail.component';
 import { TeamManagerComponent } from './components/team-manager/team-manager.component';
+import { EmailVerificationComponent } from './components/email-verification/email-verification.component';
 import { AuthGuard, AdminGuard, LoginGuard } from './guards/auth.guard';
 
 const routes: Routes = [
@@ -12,6 +13,11 @@ const routes: Routes = [
     path: 'login', 
     component: LoginComponent,
     canActivate: [LoginGuard]
+  },
+  { 
+    path: 'email-verification', 
+    component: EmailVerificationComponent,
+    canActivate: [AuthGuard]
   },
   { 
     path: 'home', 

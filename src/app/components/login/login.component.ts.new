@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { AuthService } from '../../services/auth.service';
@@ -9,15 +9,6 @@ import { EmailValidator } from '../../validators/email.validator';
 interface PasswordStrength {
   score: number;
   feedback: string[];
-  label?: string;
-  color?: string;
-  requirements?: {
-    minLength: boolean;
-    hasUpperCase: boolean;
-    hasLowerCase: boolean;
-    hasNumeric: boolean;
-    hasSpecialChar: boolean;
-  };
 }
 
 @Component({
@@ -28,8 +19,6 @@ interface PasswordStrength {
 export class LoginComponent implements OnInit {
   isLogin = true;
   loading = false;
-  hidePassword = true;
-  hideConfirmPassword = true;
   loginForm: FormGroup;
   registerForm: FormGroup;
   passwordStrength: PasswordStrength = { score: 0, feedback: [] };
@@ -42,17 +31,17 @@ export class LoginComponent implements OnInit {
     private snackBar: MatSnackBar
   ) {
     this.loginForm = this.fb.group({
-      email: ['', [Validators.required, Validators.email]],
+      email: ['', [Validators.required, EmailValidator.validate]],
       password: ['', Validators.required]
     });
 
     this.registerForm = this.fb.group({
-      email: ['', [Validators.required, EmailValidator.strictEmail()]],
-      password: ['', [Validators.required, PasswordValidator.strongPassword()]],
+      email: ['', [Validators.required, EmailValidator.validate]],
+      password: ['', [Validators.required, PasswordValidator.validate]],
       confirmPassword: ['', Validators.required],
       displayName: ['', Validators.required],
       role: ['player', Validators.required]
-    }, { validators: this.passwordsMatchValidator });
+    }, { validators: PasswordValidator.passwordsMatch });
   }
 
   ngOnInit(): void {
@@ -65,98 +54,13 @@ export class LoginComponent implements OnInit {
 
     // Listen to password changes for strength indicator
     this.registerForm.get('password')?.valueChanges.subscribe(password => {
-      this.passwordStrength = this.checkPasswordStrength(password || '');
+      this.passwordStrength = PasswordValidator.checkStrength(password || '');
     });
 
     // Listen to email changes for suggestions
     this.registerForm.get('email')?.valueChanges.subscribe(email => {
       this.checkEmailAndSuggest(email);
     });
-  }
-
-  // Custom validator for password match
-  passwordsMatchValidator(group: AbstractControl): ValidationErrors | null {
-    const password = group.get('password')?.value;
-    const confirmPassword = group.get('confirmPassword')?.value;
-    
-    if (password !== confirmPassword) {
-      return { passwordsDoNotMatch: true };
-    }
-    return null;
-  }
-
-  // Check password strength
-  checkPasswordStrength(password: string): PasswordStrength {
-    const feedback: string[] = [];
-    let score = 0;
-
-    const hasMinLength = password.length >= 8;
-    const hasUpperCase = /[A-Z]/.test(password);
-    const hasLowerCase = /[a-z]/.test(password);
-    const hasNumeric = /[0-9]/.test(password);
-    const hasSpecialChar = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password);
-
-    if (hasMinLength) {
-      score++;
-    } else {
-      feedback.push('Minimo 8 caratteri');
-    }
-
-    if (hasUpperCase) {
-      score++;
-    } else {
-      feedback.push('Almeno una lettera maiuscola');
-    }
-
-    if (hasLowerCase) {
-      score++;
-    } else {
-      feedback.push('Almeno una lettera minuscola');
-    }
-
-    if (hasNumeric) {
-      score++;
-    } else {
-      feedback.push('Almeno un numero');
-    }
-
-    if (hasSpecialChar) {
-      score++;
-    } else {
-      feedback.push('Almeno un carattere speciale');
-    }
-
-    // Determine color and label based on score
-    let color = '#f44336'; // red
-    let label = 'Molto debole';
-
-    if (score >= 5) {
-      color = '#4caf50'; // green
-      label = 'Molto forte';
-    } else if (score >= 4) {
-      color = '#8bc34a'; // light green
-      label = 'Forte';
-    } else if (score >= 3) {
-      color = '#ffc107'; // yellow
-      label = 'Media';
-    } else if (score >= 2) {
-      color = '#ff9800'; // orange
-      label = 'Debole';
-    }
-
-    return {
-      score,
-      feedback,
-      color,
-      label,
-      requirements: {
-        minLength: hasMinLength,
-        hasUpperCase,
-        hasLowerCase,
-        hasNumeric,
-        hasSpecialChar
-      }
-    };
   }
 
   toggleMode(): void {

@@ -22,6 +22,7 @@ import { AdminAuctionManagerComponent } from './components/admin-auction-manager
 import { AuctionTableComponent } from './components/auction-table/auction-table.component';
 import { TeamDetailComponent } from './components/team-detail/team-detail.component';
 import { PlayerAuctionDetailComponent } from './components/player-auction-detail/player-auction-detail.component';
+import { EmailVerificationComponent } from './components/email-verification/email-verification.component';
 
 // Material Modules
 import { MatButtonModule } from '@angular/material/button';
@@ -61,7 +62,8 @@ import { ClipboardModule } from '@angular/cdk/clipboard';
     AdminAuctionManagerComponent,
     AuctionTableComponent,
     TeamDetailComponent,
-    PlayerAuctionDetailComponent
+    PlayerAuctionDetailComponent,
+    EmailVerificationComponent
   ],
   imports: [
     BrowserModule,

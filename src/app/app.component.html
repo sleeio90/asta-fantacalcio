@@ -6,6 +6,22 @@
 
 <!-- App normale una volta completato il caricamento -->
 <div *ngIf="!(authLoading$ | async)">
+  <!-- Email verification banner -->
+  <div *ngIf="(user$ | async) && !isEmailVerified && shouldShowVerificationBanner" class="email-verification-banner">
+    <div class="banner-content">
+      <mat-icon class="warning-icon">info</mat-icon>
+      <span class="banner-text">Verifica la tua email per accedere a tutte le funzionalità</span>
+      <div class="banner-actions">
+        <button mat-button (click)="goToEmailVerification()">
+          Verifica
+        </button>
+        <button mat-icon-button (click)="dismissVerificationBanner()" title="Chiudi">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+    </div>
+  </div>
+
   <div *ngIf="user$ | async as user">
     <mat-toolbar color="primary">
       <span class="toolbar-title">Asta Fantacalcio</span>
