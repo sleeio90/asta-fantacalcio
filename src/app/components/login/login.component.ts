@@ -3,6 +3,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { AuthService } from '../../services/auth.service';
+import { PasswordValidator } from '../../validators/password.validator';
 
 @Component({
   selector: 'app-login',
@@ -15,6 +16,8 @@ export class LoginComponent implements OnInit {
   isLogin = true;
   loading = false;
   hidePassword = true;
+  hideConfirmPassword = true;
+  passwordStrength: any = { score: 0, label: 'Inserisci una password', color: '#ccc' };
 
   constructor(
     private fb: FormBuilder,
@@ -29,10 +32,15 @@ export class LoginComponent implements OnInit {
 
     this.registerForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required, Validators.minLength(6)]],
-      confirmPassword: ['', [Validators.required]],
+      password: ['', [Validators.required, PasswordValidator.strongPassword()]],
+      confirmPassword: ['', [Validators.required, PasswordValidator.confirmPassword('password')]],
       displayName: ['', [Validators.required]],
       role: ['player', [Validators.required]]
+    });
+
+    // Monitor password changes for strength indicator
+    this.registerForm.get('password')?.valueChanges.subscribe(password => {
+      this.passwordStrength = PasswordValidator.getPasswordStrength(password || '');
     });
   }
 
@@ -85,13 +93,22 @@ export class LoginComponent implements OnInit {
 
   async onRegister(): Promise<void> {
     if (this.registerForm.invalid) {
+      // Mark all fields as touched to show validation errors
+      this.registerForm.markAllAsTouched();
       return;
     }
 
     const { email, password, confirmPassword, displayName, role } = this.registerForm.value;
 
+    // Additional check for password confirmation (redundant with validator but good UX)
     if (password !== confirmPassword) {
-      this.snackBar.open('Passwords do not match', 'Close', { duration: 3000 });
+      this.snackBar.open('Le password non corrispondono', 'Close', { duration: 3000 });
+      return;
+    }
+
+    // Check password strength
+    if (this.passwordStrength.score < 5) {
+      this.snackBar.open('La password non soddisfa tutti i requisiti di sicurezza', 'Close', { duration: 5000 });
       return;
     }
 
@@ -139,12 +156,42 @@ export class LoginComponent implements OnInit {
 
   getPasswordErrorMessage(): string {
     const passwordControl = this.isLogin ? this.loginForm.get('password') : this.registerForm.get('password');
+    
     if (passwordControl?.hasError('required')) {
-      return 'Password is required';
+      return 'Password è richiesta';
     }
-    if (passwordControl?.hasError('minlength')) {
-      return 'Password must be at least 6 characters';
+    
+    if (this.isLogin && passwordControl?.hasError('minlength')) {
+      return 'Password deve essere di almeno 6 caratteri';
     }
+    
+    if (!this.isLogin && passwordControl?.hasError('strongPassword')) {
+      const errors = passwordControl.errors?.['strongPassword'];
+      const missingRequirements = [];
+      
+      if (!errors.hasMinLength) missingRequirements.push('8 caratteri');
+      if (!errors.hasUpperCase) missingRequirements.push('una maiuscola');
+      if (!errors.hasLowerCase) missingRequirements.push('una minuscola');
+      if (!errors.hasNumeric) missingRequirements.push('un numero');
+      if (!errors.hasSpecialChar) missingRequirements.push('un carattere speciale');
+      
+      return `Password deve contenere: ${missingRequirements.join(', ')}`;
+    }
+    
+    return '';
+  }
+
+  getConfirmPasswordErrorMessage(): string {
+    const confirmPasswordControl = this.registerForm.get('confirmPassword');
+    
+    if (confirmPasswordControl?.hasError('required')) {
+      return 'Conferma password è richiesta';
+    }
+    
+    if (confirmPasswordControl?.hasError('confirmPassword')) {
+      return 'Le password non corrispondono';
+    }
+    
     return '';
   }
 }

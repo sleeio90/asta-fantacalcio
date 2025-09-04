@@ -67,12 +67,67 @@
           <mat-error>{{ getPasswordErrorMessage() }}</mat-error>
         </mat-form-field>
 
+        <!-- Password Strength Indicator - Outside mat-form-field -->
+        <div class="password-strength-container" *ngIf="registerForm.get('password')?.value">
+          <div class="password-strength">
+            <div class="strength-meter">
+              <div class="strength-bar" 
+                   [style.width.%]="(passwordStrength.score / 5) * 100"
+                   [style.background-color]="passwordStrength.color">
+              </div>
+            </div>
+            <span class="strength-label" [style.color]="passwordStrength.color">
+              {{ passwordStrength.label }}
+            </span>
+          </div>
+          
+          <!-- Requirements List -->
+          <div class="password-requirements" *ngIf="passwordStrength.score < 5">
+            <div class="requirement" 
+                 [class.met]="passwordStrength.requirements?.minLength">
+              <mat-icon class="requirement-icon">
+                {{ passwordStrength.requirements?.minLength ? 'check_circle' : 'radio_button_unchecked' }}
+              </mat-icon>
+              Almeno 8 caratteri
+            </div>
+            <div class="requirement" 
+                 [class.met]="passwordStrength.requirements?.hasUpperCase">
+              <mat-icon class="requirement-icon">
+                {{ passwordStrength.requirements?.hasUpperCase ? 'check_circle' : 'radio_button_unchecked' }}
+              </mat-icon>
+              Una lettera maiuscola
+            </div>
+            <div class="requirement" 
+                 [class.met]="passwordStrength.requirements?.hasLowerCase">
+              <mat-icon class="requirement-icon">
+                {{ passwordStrength.requirements?.hasLowerCase ? 'check_circle' : 'radio_button_unchecked' }}
+              </mat-icon>
+              Una lettera minuscola
+            </div>
+            <div class="requirement" 
+                 [class.met]="passwordStrength.requirements?.hasNumeric">
+              <mat-icon class="requirement-icon">
+                {{ passwordStrength.requirements?.hasNumeric ? 'check_circle' : 'radio_button_unchecked' }}
+              </mat-icon>
+              Un numero
+            </div>
+            <div class="requirement" 
+                 [class.met]="passwordStrength.requirements?.hasSpecialChar">
+              <mat-icon class="requirement-icon">
+                {{ passwordStrength.requirements?.hasSpecialChar ? 'check_circle' : 'radio_button_unchecked' }}
+              </mat-icon>
+              Un carattere speciale (!@#$%^&*...)
+            </div>
+          </div>
+        </div>
+
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>Conferma Password</mat-label>
-          <input matInput type="password" formControlName="confirmPassword">
-          <mat-error *ngIf="registerForm.get('confirmPassword')?.hasError('required')">
-            Conferma password è richiesta
-          </mat-error>
+          <input matInput [type]="hideConfirmPassword ? 'password' : 'text'" formControlName="confirmPassword">
+          <button mat-icon-button matSuffix (click)="hideConfirmPassword = !hideConfirmPassword" type="button">
+            <mat-icon>{{ hideConfirmPassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+          </button>
+          <mat-error>{{ getConfirmPasswordErrorMessage() }}</mat-error>
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="full-width">
