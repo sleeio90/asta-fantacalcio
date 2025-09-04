@@ -21,64 +21,124 @@
   background: #fff3cd;
   border-left: 4px solid #ffc107;
   color: #856404;
-  padding: 8px 16px;
+  padding: 12px 16px;
   font-size: 13px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
   position: relative;
   z-index: 999;
+  width: 100%;
+  box-sizing: border-box;
   
   .banner-content {
     display: flex;
     align-items: center;
-    gap: 8px;
+    justify-content: space-between;
+    gap: 12px;
     max-width: 1200px;
     margin: 0 auto;
+    min-height: 40px;
     
     .warning-icon {
-      font-size: 16px;
+      font-size: 20px !important;
       color: #f57c00;
       flex-shrink: 0;
+      line-height: 1 !important;
+      width: 20px !important;
+      height: 20px !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
     }
     
     .banner-text {
       flex: 1;
       font-weight: 400;
-      line-height: 1.3;
+      line-height: 1.4;
+      margin: 0 8px;
+      display: flex;
+      align-items: center;
     }
     
     .banner-actions {
       display: flex;
       align-items: center;
-      gap: 4px;
+      gap: 8px;
       flex-shrink: 0;
       
+      // Override Material Design button styles
+      .mdc-button {
+        background: transparent !important;
+        color: #f57c00 !important;
+        font-size: 12px !important;
+        font-weight: 500 !important;
+        padding: 8px 16px !important;
+        min-width: auto !important;
+        height: 36px !important;
+        border-radius: 4px !important;
+        line-height: 1 !important;
+        
+        .mdc-button__label {
+          color: #f57c00 !important;
+        }
+        
+        &:hover {
+          background: rgba(245, 124, 0, 0.1) !important;
+        }
+      }
+      
+      .mdc-icon-button {
+        color: #856404 !important;
+        width: 36px !important;
+        height: 36px !important;
+        line-height: 1 !important;
+        padding: 6px !important;
+        
+        .mat-icon {
+          font-size: 20px !important;
+          width: 20px !important;
+          height: 20px !important;
+          line-height: 1 !important;
+        }
+        
+        &:hover {
+          background: rgba(133, 100, 4, 0.1) !important;
+        }
+      }
+      
+      // Fallback for legacy button selectors
       button {
         &[mat-button] {
-          background: transparent;
-          color: #f57c00;
-          font-size: 12px;
-          font-weight: 500;
-          padding: 4px 8px;
-          min-width: auto;
-          height: 28px;
-          border-radius: 4px;
+          background: transparent !important;
+          color: #f57c00 !important;
+          font-size: 12px !important;
+          font-weight: 500 !important;
+          padding: 8px 16px !important;
+          min-width: auto !important;
+          height: 36px !important;
+          border-radius: 4px !important;
+          line-height: 1 !important;
           
           &:hover {
-            background: rgba(245, 124, 0, 0.1);
+            background: rgba(245, 124, 0, 0.1) !important;
           }
         }
         
         &[mat-icon-button] {
-          color: #856404;
-          width: 24px;
-          height: 24px;
+          color: #856404 !important;
+          width: 36px !important;
+          height: 36px !important;
+          line-height: 1 !important;
+          padding: 6px !important;
           
           .material-icons {
-            font-size: 16px;
+            font-size: 20px !important;
+            width: 20px !important;
+            height: 20px !important;
+            line-height: 1 !important;
           }
           
           &:hover {
-            background: rgba(133, 100, 4, 0.1);
+            background: rgba(133, 100, 4, 0.1) !important;
           }
         }
       }
@@ -89,18 +149,89 @@
 // Responsive banner
 @media (max-width: 768px) {
   .email-verification-banner {
-    padding: 6px 12px;
+    padding: 10px 12px;
     
     .banner-content {
-      gap: 6px;
+      gap: 8px;
+      min-height: 36px;
+      
+      .warning-icon {
+        font-size: 18px !important;
+        width: 18px !important;
+        height: 18px !important;
+      }
       
       .banner-text {
         font-size: 12px;
+        margin: 0 4px;
       }
       
-      .banner-actions button[mat-button] {
-        font-size: 11px;
-        padding: 2px 6px;
+      .banner-actions {
+        gap: 4px;
+        
+        .mdc-button {
+          font-size: 11px !important;
+          padding: 6px 12px !important;
+          height: 32px !important;
+        }
+        
+        .mdc-icon-button {
+          width: 32px !important;
+          height: 32px !important;
+          
+          .mat-icon {
+            font-size: 18px !important;
+            width: 18px !important;
+            height: 18px !important;
+          }
+        }
+        
+        button {
+          &[mat-button] {
+            font-size: 11px !important;
+            padding: 6px 12px !important;
+            height: 32px !important;
+          }
+          
+          &[mat-icon-button] {
+            width: 32px !important;
+            height: 32px !important;
+            
+            .material-icons {
+              font-size: 18px !important;
+              width: 18px !important;
+              height: 18px !important;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  // Per schermi molto piccoli, stack verticalmente
+  @media (max-width: 480px) {
+    .email-verification-banner {
+      .banner-content {
+        flex-direction: column;
+        align-items: center;
+        gap: 12px;
+        text-align: center;
+        min-height: auto;
+        padding: 8px 0;
+        
+        .banner-text {
+          margin: 0;
+          order: 1;
+        }
+        
+        .warning-icon {
+          order: 0;
+        }
+        
+        .banner-actions {
+          justify-content: center;
+          order: 2;
+        }
       }
     }
   }
