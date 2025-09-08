@@ -5,12 +5,14 @@ import { Observable, BehaviorSubject, of } from 'rxjs';
 import { switchMap, map, take } from 'rxjs/operators';
 import firebase from 'firebase/compat/app';
 import 'firebase/compat/auth';
+import { AppConfigService } from './app-config.service';
+import { environment } from '../../environments/environment';
 
 export interface UserProfile {
   uid: string;
   email: string;
   displayName?: string;
-  role: 'admin' | 'player';
+  role: 'admin' | 'player' | 'superadmin';
   createdAt: Date;
   emailVerified?: boolean;
 }
@@ -27,7 +29,8 @@ export class AuthService {
 
   constructor(
     private afAuth: AngularFireAuth,
-    private db: AngularFireDatabase
+    private db: AngularFireDatabase,
+    private appConfigService: AppConfigService
   ) {
     // Monitor auth state changes
     this.afAuth.authState.pipe(
@@ -48,7 +51,7 @@ export class AuthService {
   }
 
   // Register new user
-  async register(email: string, password: string, displayName: string, role: 'admin' | 'player' = 'player'): Promise<UserProfile> {
+  async register(email: string, password: string, displayName: string, role: 'admin' | 'player' | 'superadmin' = 'player'): Promise<UserProfile> {
     try {
       const credential = await this.afAuth.createUserWithEmailAndPassword(email, password);
       if (!credential.user) {
@@ -58,20 +61,28 @@ export class AuthService {
       // Update the user's display name
       await credential.user.updateProfile({ displayName });
 
-      // Send email verification with custom settings
-      const actionCodeSettings = {
-        url: window.location.origin + '/email-verification',
-        handleCodeInApp: true
-      };
-      
-      await credential.user.sendEmailVerification(actionCodeSettings);
+      // Determina il ruolo finale: se l'email corrisponde al super-admin, assegna superadmin
+      let finalRole = role;
+      if (email.toLowerCase() === environment.superAdmin.email.toLowerCase()) {
+        finalRole = 'superadmin';
+      }
+
+      // Send email verification only if required by configuration
+      if (this.appConfigService.isEmailVerificationRequired()) {
+        const actionCodeSettings = {
+          url: window.location.origin + '/email-verification',
+          handleCodeInApp: true
+        };
+        
+        await credential.user.sendEmailVerification(actionCodeSettings);
+      }
 
       // Create user profile in database
       const userProfile: UserProfile = {
         uid: credential.user.uid,
         email: email,
         displayName: displayName,
-        role: role,
+        role: finalRole,
         createdAt: new Date(),
         emailVerified: credential.user.emailVerified
       };
@@ -148,7 +159,13 @@ export class AuthService {
   // Check if user is admin
   isAdmin(): boolean {
     const user = this.getCurrentUser();
-    return user?.role === 'admin' || false;
+    return user?.role === 'admin' || user?.role === 'superadmin' || false;
+  }
+
+  // Check if user is super admin
+  isSuperAdmin(): boolean {
+    const user = this.getCurrentUser();
+    return user?.role === 'superadmin' || false;
   }
 
   // Check if user is authenticated
@@ -157,15 +174,15 @@ export class AuthService {
   }
 
   // Get user role
-  getUserRole(): 'admin' | 'player' | null {
+  getUserRole(): 'admin' | 'player' | 'superadmin' | null {
     const user = this.getCurrentUser();
     return user?.role || null;
   }
 
-  // Update user role (admin only)
-  async updateUserRole(uid: string, newRole: 'admin' | 'player'): Promise<void> {
-    if (!this.isAdmin()) {
-      throw new Error('Solo gli admin possono aggiornare i ruoli utente');
+  // Update user role (super-admin only)
+  async updateUserRole(uid: string, newRole: 'admin' | 'player' | 'superadmin'): Promise<void> {
+    if (!this.isSuperAdmin()) {
+      throw new Error('Solo il super-admin può aggiornare i ruoli utente');
     }
 
     try {

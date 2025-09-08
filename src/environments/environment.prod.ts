@@ -9,5 +9,11 @@ export const environment = {
     messagingSenderId: "397600113110",
     appId: "1:397600113110:web:a0c26c95c5c88846f4e477",
     measurementId: "G-E4MSFFZ38J"
+  },
+  features: {
+    requireEmailVerification: true // Controllo per abilitare/disabilitare la verifica email
+  },
+  superAdmin: {
+    email: 'your-email@example.com' // Inserisci qui la tua email come super-admin
   }
 };

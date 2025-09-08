@@ -3,6 +3,7 @@ import { FormBuilder, FormGroup, Validators, AbstractControl, ValidationErrors }
 import { Router } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { AuthService } from '../../services/auth.service';
+import { AppConfigService } from '../../services/app-config.service';
 import { PasswordValidator } from '../../validators/password.validator';
 import { EmailValidator } from '../../validators/email.validator';
 
@@ -38,6 +39,7 @@ export class LoginComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
+    private appConfigService: AppConfigService,
     private router: Router,
     private snackBar: MatSnackBar
   ) {
@@ -228,9 +230,17 @@ export class LoginComponent implements OnInit {
 
     try {
       await this.authService.register(email, password, displayName, role);
-      this.snackBar.open('Registration successful! Please check your email for verification.', 'Close', { duration: 5000 });
-      // Redirect to email verification page
-      this.router.navigate(['/email-verification']);
+      
+      // Controlla se la verifica email è richiesta
+      if (this.appConfigService.isEmailVerificationRequired()) {
+        this.snackBar.open('Registration successful! Please check your email for verification.', 'Close', { duration: 5000 });
+        // Redirect to email verification page
+        this.router.navigate(['/email-verification']);
+      } else {
+        this.snackBar.open('Registration successful! Welcome!', 'Close', { duration: 3000 });
+        // Redirect to home page
+        this.router.navigate(['/home']);
+      }
     } catch (error: any) {
       console.error('Registration error:', error);
       this.snackBar.open(error.message || 'Registration failed', 'Close', { duration: 5000 });

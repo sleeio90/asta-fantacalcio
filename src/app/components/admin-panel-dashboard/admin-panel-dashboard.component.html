@@ -1,0 +1,130 @@
+<div class="admin-dashboard-container">
+  <!-- Header del pannello -->
+  <div class="dashboard-header">
+    <div class="header-content">
+      <div class="header-left">
+        <div class="logo">
+          <i class="fas fa-shield-alt"></i>
+        </div>
+        <div class="title-section">
+          <h1>Pannello Gestionale</h1>
+          <p class="subtitle">Asta Fantacalcio - Area Amministrativa</p>
+        </div>
+      </div>
+      
+      <div class="header-right">
+        <button class="btn btn-secondary" (click)="goToMainApp()">
+          <i class="fas fa-arrow-left"></i>
+          App Principale
+        </button>
+        <button class="btn btn-danger" (click)="logout()">
+          <i class="fas fa-sign-out-alt"></i>
+          Logout
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Avviso sessione in scadenza -->
+  <div class="session-warning" *ngIf="isSessionExpiring">
+    <div class="warning-content">
+      <i class="fas fa-clock"></i>
+      <span>La sessione sta per scadere tra meno di 1 ora</span>
+      <button class="btn btn-warning btn-sm" (click)="extendSession()">
+        <i class="fas fa-refresh"></i>
+        Estendi Sessione
+      </button>
+    </div>
+  </div>
+
+  <!-- Contenuto principale -->
+  <div class="dashboard-content">
+    
+    <!-- Informazioni sessione -->
+    <div class="card info-card">
+      <div class="card-header">
+        <i class="fas fa-info-circle"></i>
+        <h3>Informazioni Sessione</h3>
+      </div>
+      <div class="card-body">
+        <div class="info-row">
+          <span class="label">Stato:</span>
+          <span class="value status-active">
+            <i class="fas fa-check-circle"></i>
+            Autenticato
+          </span>
+        </div>
+        <div class="info-row">
+          <span class="label">Login effettuato:</span>
+          <span class="value">{{ sessionInfo.authenticatedAt | date:'dd/MM/yyyy HH:mm' }}</span>
+        </div>
+        <div class="info-row">
+          <span class="label">Scadenza sessione:</span>
+          <span class="value" [class.warning]="isSessionExpiring">
+            {{ (sessionInfo.authenticatedAt | date:'dd/MM/yyyy HH:mm') || 'N/A' }} (+24h)
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Menu delle funzionalità -->
+    <div class="features-grid">
+      
+      <!-- Configurazioni App -->
+      <div class="feature-card" (click)="goToSettings()">
+        <div class="feature-icon">
+          <i class="fas fa-cog"></i>
+        </div>
+        <div class="feature-content">
+          <h3>Configurazioni App</h3>
+          <p>Gestisci le impostazioni globali dell'applicazione</p>
+          <ul>
+            <li>Verifica email</li>
+            <li>Limiti partecipanti</li>
+            <li>Notifiche</li>
+          </ul>
+        </div>
+        <div class="feature-arrow">
+          <i class="fas fa-chevron-right"></i>
+        </div>
+      </div>
+
+      <!-- Statistiche (placeholder per future funzionalità) -->
+      <div class="feature-card disabled">
+        <div class="feature-icon">
+          <i class="fas fa-chart-bar"></i>
+        </div>
+        <div class="feature-content">
+          <h3>Statistiche</h3>
+          <p>Visualizza statistiche e metriche dell'applicazione</p>
+          <span class="badge">Prossimamente</span>
+        </div>
+      </div>
+
+      <!-- Gestione Utenti (placeholder per future funzionalità) -->
+      <div class="feature-card disabled">
+        <div class="feature-icon">
+          <i class="fas fa-users"></i>
+        </div>
+        <div class="feature-content">
+          <h3>Gestione Utenti</h3>
+          <p>Visualizza e gestisci gli utenti registrati</p>
+          <span class="badge">Prossimamente</span>
+        </div>
+      </div>
+
+      <!-- Backup e Maintenance (placeholder per future funzionalità) -->
+      <div class="feature-card disabled">
+        <div class="feature-icon">
+          <i class="fas fa-database"></i>
+        </div>
+        <div class="feature-content">
+          <h3>Backup & Manutenzione</h3>
+          <p>Strumenti per backup e manutenzione del sistema</p>
+          <span class="badge">Prossimamente</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>

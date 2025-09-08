@@ -1,0 +1,103 @@
+<div class="admin-panel-login-container">
+  <div class="login-wrapper">
+    <!-- Header -->
+    <div class="login-header">
+      <div class="logo">
+        <i class="fas fa-shield-alt"></i>
+      </div>
+      <h1>Pannello Gestionale</h1>
+      <p class="subtitle">Asta Fantacalcio - Area Amministrativa</p>
+    </div>
+
+    <!-- Form di login -->
+    <div class="login-form-container">
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
+        
+        <!-- Campo Username -->
+        <div class="form-group">
+          <label for="username">Username</label>
+          <div class="input-group">
+            <div class="input-icon">
+              <i class="fas fa-user"></i>
+            </div>
+            <input 
+              type="text" 
+              id="username"
+              class="form-control"
+              formControlName="username"
+              placeholder="Inserisci username"
+              [class.error]="username?.invalid && username?.touched"
+              autocomplete="username">
+          </div>
+          <div class="error-message" *ngIf="username?.invalid && username?.touched">
+            <i class="fas fa-exclamation-circle"></i>
+            Username richiesto
+          </div>
+        </div>
+
+        <!-- Campo Password -->
+        <div class="form-group">
+          <label for="password">Password</label>
+          <div class="input-group">
+            <div class="input-icon">
+              <i class="fas fa-lock"></i>
+            </div>
+            <input 
+              [type]="hidePassword ? 'password' : 'text'"
+              id="password"
+              class="form-control"
+              formControlName="password"
+              placeholder="Inserisci password"
+              [class.error]="password?.invalid && password?.touched"
+              autocomplete="current-password">
+            <button 
+              type="button" 
+              class="password-toggle"
+              (click)="togglePasswordVisibility()"
+              tabindex="-1">
+              <i [class]="hidePassword ? 'fas fa-eye' : 'fas fa-eye-slash'"></i>
+            </button>
+          </div>
+          <div class="error-message" *ngIf="password?.invalid && password?.touched">
+            <i class="fas fa-exclamation-circle"></i>
+            Password richiesta
+          </div>
+        </div>
+
+        <!-- Messaggio di errore generale -->
+        <div class="error-message global-error" *ngIf="errorMessage">
+          <i class="fas fa-exclamation-triangle"></i>
+          {{ errorMessage }}
+        </div>
+
+        <!-- Pulsante di login -->
+        <button 
+          type="submit" 
+          class="btn-login"
+          [disabled]="!loginForm.valid || isLoading">
+          <span *ngIf="isLoading" class="spinner">
+            <i class="fas fa-spinner fa-spin"></i>
+          </span>
+          <span *ngIf="!isLoading">
+            <i class="fas fa-sign-in-alt"></i>
+          </span>
+          {{ isLoading ? 'Accesso in corso...' : 'Accedi al Pannello' }}
+        </button>
+
+      </form>
+    </div>
+
+    <!-- Footer -->
+    <div class="login-footer">
+      <button type="button" class="btn-back" (click)="goToMainApp()">
+        <i class="fas fa-arrow-left"></i>
+        Torna all'App Principale
+      </button>
+      
+      <div class="security-note">
+        <i class="fas fa-info-circle"></i>
+        <span>Area riservata al gestore dell'applicazione</span>
+      </div>
+    </div>
+  </div>
+</div>

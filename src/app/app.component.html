@@ -7,7 +7,7 @@
 <!-- App normale una volta completato il caricamento -->
 <div *ngIf="!(authLoading$ | async)">
   <!-- Email verification banner -->
-  <div *ngIf="(user$ | async) && !isEmailVerified && shouldShowVerificationBanner" class="email-verification-banner">
+  <div *ngIf="(user$ | async) && !isEmailVerified && shouldShowVerificationBanner && (isEmailVerificationRequired$ | async)" class="email-verification-banner">
     <div class="banner-content">
       <mat-icon class="warning-icon">info</mat-icon>
       <span class="banner-text">Verifica la tua email per accedere a tutte le funzionalità</span>

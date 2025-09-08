@@ -34,8 +34,9 @@ export class FirebaseAstaService {
   private reconstructAstaFromFirebase(data: any): Asta {
     console.log('Ricostruzione asta da Firebase:', data);
     
-    // Ricostruisci i teams
+    // Ricostruisci i teams mantenendo il mapping con le chiavi Firebase
     const teams: Team[] = Object.keys(data.teams || {})
+      .sort() // Ordina le chiavi per garantire coerenza
       .map(key => {
         const teamData = data.teams[key];
         console.log('Ricostruzione team da Firebase:', key, teamData);
@@ -46,6 +47,9 @@ export class FirebaseAstaService {
         // Copia dati aggiuntivi del team
         if (teamData.userId) (team as any).userId = teamData.userId;
         if (teamData.userEmail) (team as any).userEmail = teamData.userEmail;
+        
+        // Mantieni la chiave Firebase per riferimenti futuri
+        (team as any).firebaseKey = key;
 
         // Ricostruisci i calciatori del team
         if (teamData.calciatori) {
@@ -111,9 +115,11 @@ export class FirebaseAstaService {
       calciatori: {}
     };
 
-    // Converte i teams
+    // Converte i teams usando chiavi uniche
     teams.forEach((team, index) => {
-      astaData.teams[`team_${index}`] = {
+      const teamKey = `team_${Date.now()}_${index}_${Math.floor(Math.random() * 1000)}`;
+      (team as any).firebaseKey = teamKey; // Salva la chiave per riferimenti futuri
+      astaData.teams[teamKey] = {
         nome: team.nome,
         budget: team.budget,
         budgetIniziale: team.budgetIniziale,
@@ -215,10 +221,16 @@ export class FirebaseAstaService {
 
     // Salva su Firebase - aggiorna solo il team specifico
     const updates: any = {};
-    const teamIndex = asta.teams.findIndex(t => t.nome === team.nome);
     
-    updates[`/aste/${asta.id}/teams/team_${teamIndex}/budget`] = targetTeam.budget;
-    updates[`/aste/${asta.id}/teams/team_${teamIndex}/calciatori/calc_${calciatore.id}`] = {
+    // Usa la chiave Firebase originale del team invece di findIndex
+    const targetTeamKey = (targetTeam as any).firebaseKey;
+    if (!targetTeamKey) {
+      console.error('Chiave Firebase del team non trovata');
+      return Promise.resolve(false);
+    }
+    
+    updates[`/aste/${asta.id}/teams/${targetTeamKey}/budget`] = targetTeam.budget;
+    updates[`/aste/${asta.id}/teams/${targetTeamKey}/calciatori/calc_${calciatore.id}`] = {
       id: calciatoreAssegnato.id,
       nome: calciatoreAssegnato.nome,
       squadra: calciatoreAssegnato.squadra,
@@ -319,11 +331,18 @@ export class FirebaseAstaService {
 
     // Aggiorna Firebase - rimuove il calciatore dal team
     const updates: any = {};
-    const teamIndex = asta.teams.findIndex(t => t.nome === targetTeam.nome);
-    console.log('Aggiornamento Firebase per team index:', teamIndex);
     
-    updates[`/aste/${asta.id}/teams/team_${teamIndex}/budget`] = targetTeam.budget;
-    updates[`/aste/${asta.id}/teams/team_${teamIndex}/calciatori/calc_${calciatore.id}`] = null; // Rimuove il nodo
+    // Usa la chiave Firebase originale del team invece di findIndex
+    const targetTeamKey = (targetTeam as any).firebaseKey;
+    if (!targetTeamKey) {
+      console.error('Chiave Firebase del team non trovata per rimozione');
+      return Promise.resolve(false);
+    }
+    
+    console.log('Aggiornamento Firebase per team key:', targetTeamKey);
+    
+    updates[`/aste/${asta.id}/teams/${targetTeamKey}/budget`] = targetTeam.budget;
+    updates[`/aste/${asta.id}/teams/${targetTeamKey}/calciatori/calc_${calciatore.id}`] = null; // Rimuove il nodo
     
     console.log('Updates da inviare a Firebase:', updates);
 
@@ -347,8 +366,8 @@ export class FirebaseAstaService {
       calciatori: {}
     };
 
-    // Aggiorna teams
-    asta.teams.forEach((team, index) => {
+    // Aggiorna teams usando le chiavi Firebase originali
+    asta.teams.forEach((team) => {
       const teamCalciatori: any = {};
       team.calciatori.forEach((calc, calcIndex) => {
         teamCalciatori[`calc_${calc.id}`] = {
@@ -365,7 +384,9 @@ export class FirebaseAstaService {
         };
       });
 
-      astaData.teams[`team_${index}`] = {
+      // Usa la chiave Firebase originale se disponibile, altrimenti genera una nuova
+      const teamKey = (team as any).firebaseKey || `team_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+      astaData.teams[teamKey] = {
         nome: team.nome,
         budget: team.budget,
         budgetIniziale: team.budgetIniziale,
@@ -478,6 +499,7 @@ export class FirebaseAstaService {
   // Metodo per unirsi a un'asta
   joinAsta(joinRequest: AstaJoinRequest): Promise<AstaJoinResponse> {
     return new Promise((resolve, reject) => {
+      // Prima ottieni l'asta tramite codice
       this.getAstaByCode(joinRequest.codiceInvito).subscribe(asta => {
         if (!asta) {
           resolve({ success: false, message: 'Codice asta non valido' });
@@ -489,36 +511,60 @@ export class FirebaseAstaService {
           return;
         }
 
-        // Verifica se il nome del team è già in uso
-        const teamExists = asta.teams.some(team => team.nome.toLowerCase() === joinRequest.nomeTeam.toLowerCase());
-        if (teamExists) {
-          resolve({ success: false, message: 'Nome team già in uso' });
-          return;
-        }
+        // Ora fai un controllo diretto su Firebase per i nomi dei team
+        // per essere sicuri di avere i dati più aggiornati
+        this.db.object(`/aste/${asta.id}/teams`).valueChanges().pipe(take(1)).subscribe(teamsData => {
+          const teams = teamsData as any;
+          
+          // Verifica se il nome del team è già in uso controllando direttamente Firebase
+          const teamExists = teams && Object.keys(teams).some(key => {
+            const team = teams[key];
+            return team.nome && team.nome.toLowerCase().trim() === joinRequest.nomeTeam.toLowerCase().trim();
+          });
+          
+          if (teamExists) {
+            console.log('Nome team già esistente:', joinRequest.nomeTeam);
+            resolve({ success: false, message: 'Nome team già in uso' });
+            return;
+          }
 
-        // Crea il nuovo team
-        const newTeam = new Team(joinRequest.nomeTeam, asta.creditiPerPartecipante);
-        
-        // Aggiorna l'asta su Firebase
-        const teamKey = `team_${asta.teams.length}`;
-        const updates: any = {};
-        updates[`/aste/${asta.id}/teams/${teamKey}`] = {
-          nome: newTeam.nome,
-          budget: newTeam.budget,
-          budgetIniziale: newTeam.budgetIniziale,
-          userId: joinRequest.userId,
-          userEmail: joinRequest.userEmail,
-          calciatori: {}
-        };
-        
-        // Incrementa i partecipanti solo se non è il primo team (che sarebbe l'amministratore)
-        const nuovoConteggio = asta.teams.length === 0 ? 1 : asta.partecipantiIscritti + 1;
-        updates[`/aste/${asta.id}/partecipantiIscritti`] = nuovoConteggio;
+          // Crea il nuovo team
+          const newTeam = new Team(joinRequest.nomeTeam, asta.creditiPerPartecipante);
+          
+          // Aggiorna l'asta su Firebase
+          // Genera una chiave unica basata sul timestamp e un numero casuale per evitare collisioni
+          const timestamp = Date.now();
+          const random = Math.floor(Math.random() * 1000);
+          const teamKey = `team_${timestamp}_${random}`;
+          
+          const updates: any = {};
+          updates[`/aste/${asta.id}/teams/${teamKey}`] = {
+            nome: newTeam.nome.trim(), // Assicurati di rimuovere spazi
+            budget: newTeam.budget,
+            budgetIniziale: newTeam.budgetIniziale,
+            userId: joinRequest.userId,
+            userEmail: joinRequest.userEmail,
+            calciatori: {}
+          };
+          
+          // Incrementa i partecipanti
+          const currentTeamCount = teams ? Object.keys(teams).length : 0;
+          const nuovoConteggio = currentTeamCount + 1;
+          updates[`/aste/${asta.id}/partecipantiIscritti`] = nuovoConteggio;
 
-        this.db.object('/').update(updates).then(() => {
-          resolve({ success: true, message: 'Iscrizione effettuata con successo', asta: asta });
-        }).catch(error => {
-          reject(error);
+          console.log('Creazione nuovo team:', {
+            nomeTeam: joinRequest.nomeTeam,
+            teamKey: teamKey,
+            nuovoConteggio: nuovoConteggio
+          });
+
+          this.db.object('/').update(updates).then(() => {
+            console.log('Team creato con successo');
+            resolve({ success: true, message: 'Iscrizione effettuata con successo', asta: asta });
+          }).catch(error => {
+            console.error('Errore durante la creazione del team:', error);
+            reject(error);
+          });
         });
       });
     });
@@ -603,9 +649,10 @@ export class FirebaseAstaService {
       calciatori: {}
     };
 
-    // Converte i teams
-    asta.teams.forEach((team, index) => {
-      astaData.teams[`team_${index}`] = {
+    // Converte i teams usando le chiavi Firebase originali
+    asta.teams.forEach((team) => {
+      const teamKey = (team as any).firebaseKey || `team_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+      astaData.teams[teamKey] = {
         nome: team.nome,
         budget: team.budget,
         budgetIniziale: team.budgetIniziale,
@@ -615,8 +662,8 @@ export class FirebaseAstaService {
       };
 
       // Aggiungi i calciatori del team se presenti
-      team.calciatori.forEach((calc, calcIndex) => {
-        astaData.teams[`team_${index}`].calciatori[`calc_${calcIndex}`] = {
+      team.calciatori.forEach((calc) => {
+        astaData.teams[teamKey].calciatori[`calc_${calc.id}`] = {
           id: calc.id,
           nome: calc.nome,
           squadra: calc.squadra,
@@ -739,19 +786,19 @@ export class FirebaseAstaService {
         
         // Trova il team nei dati Firebase
         const teamKeys = Object.keys(data.teams || {});
-        let teamIndex = -1;
+        let teamKey = null;
         let teamData = null;
         
-        for (let i = 0; i < teamKeys.length; i++) {
-          const team = data.teams[teamKeys[i]];
+        for (const key of teamKeys) {
+          const team = data.teams[key];
           if (team.nome === teamNome) {
-            teamIndex = i;
+            teamKey = key;
             teamData = team;
             break;
           }
         }
 
-        if (!teamData) {
+        if (!teamData || !teamKey) {
           reject(new Error('Team non trovato'));
           return;
         }
@@ -776,13 +823,13 @@ export class FirebaseAstaService {
         const updates: any = {};
         const newBudget = teamData.budget - differenza;
         
-        updates[`/aste/${astaId}/teams/team_${teamIndex}/budget`] = newBudget;
-        updates[`/aste/${astaId}/teams/team_${teamIndex}/calciatori/calc_${calciatore.id}/prezzoAcquisto`] = nuovoPrezzo;
+        updates[`/aste/${astaId}/teams/${teamKey}/budget`] = newBudget;
+        updates[`/aste/${astaId}/teams/${teamKey}/calciatori/calc_${calciatore.id}/prezzoAcquisto`] = nuovoPrezzo;
 
         // Aggiorna anche l'asta corrente se è la stessa (senza triggering del subject)
         if (this.astaSubject.value && this.astaSubject.value.id === astaId) {
-          updates[`/asta/teams/team_${teamIndex}/budget`] = newBudget;
-          updates[`/asta/teams/team_${teamIndex}/calciatori/calc_${calciatore.id}/prezzoAcquisto`] = nuovoPrezzo;
+          updates[`/asta/teams/${teamKey}/budget`] = newBudget;
+          updates[`/asta/teams/${teamKey}/calciatori/calc_${calciatore.id}/prezzoAcquisto`] = nuovoPrezzo;
         }
 
         this.db.object('/').update(updates).then(() => {

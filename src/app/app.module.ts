@@ -24,6 +24,9 @@ import { TeamDetailComponent } from './components/team-detail/team-detail.compon
 import { PlayerAuctionDetailComponent } from './components/player-auction-detail/player-auction-detail.component';
 import { EmailVerificationComponent } from './components/email-verification/email-verification.component';
 import { PlayerActionDialogComponent } from './components/player-action-dialog/player-action-dialog.component';
+import { AdminSettingsComponent } from './components/admin-settings/admin-settings.component';
+import { AdminPanelLoginComponent } from './components/admin-panel-login/admin-panel-login.component';
+import { AdminPanelDashboardComponent } from './components/admin-panel-dashboard/admin-panel-dashboard.component';
 
 // Material Modules
 import { MatButtonModule } from '@angular/material/button';
@@ -66,7 +69,10 @@ import { ClipboardModule } from '@angular/cdk/clipboard';
     TeamDetailComponent,
     PlayerAuctionDetailComponent,
     EmailVerificationComponent,
-    PlayerActionDialogComponent
+    PlayerActionDialogComponent,
+    AdminSettingsComponent,
+    AdminPanelLoginComponent,
+    AdminPanelDashboardComponent
   ],
   imports: [
     BrowserModule,

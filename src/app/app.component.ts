@@ -3,8 +3,9 @@ import { Router } from '@angular/router';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { AuthService, UserProfile } from './services/auth.service';
 import { AstaService } from './services/asta.service';
-import { Observable } from 'rxjs';
-import { take } from 'rxjs/operators';
+import { AppConfigService } from './services/app-config.service';
+import { Observable, combineLatest } from 'rxjs';
+import { take, map } from 'rxjs/operators';
 
 @Component({
   selector: 'app-root',
@@ -17,31 +18,42 @@ export class AppComponent implements OnInit {
   authLoading$: Observable<boolean>;
   isEmailVerified = false;
   shouldShowVerificationBanner = true;
+  isEmailVerificationRequired$ = this.appConfigService.config$.pipe(
+    map(config => config?.requireEmailVerification ?? true)
+  );
   
   constructor(
     private authService: AuthService,
     private router: Router,
     private dialog: MatDialog,
-    private astaService: AstaService
+    private astaService: AstaService,
+    private appConfigService: AppConfigService
   ) {
     this.user$ = this.authService.user$;
     this.authLoading$ = this.authService.authLoading$;
   }
 
   ngOnInit(): void {
-    // Monitor email verification status
-    this.user$.subscribe(user => {
+    // Pulisci la cache del banner all'avvio
+    localStorage.removeItem('emailVerificationBannerDismissed');
+    
+    // Monitor both user status and email verification requirement
+    combineLatest([this.user$, this.isEmailVerificationRequired$]).subscribe(([user, isVerificationRequired]) => {
+      console.log('AppComponent - User:', user?.email, 'Email verified:', this.authService.isEmailVerified(), 'Verification required:', isVerificationRequired);
+      
       if (user) {
         this.isEmailVerified = this.authService.isEmailVerified();
         
-        // If email is verified, clear the dismissed banner flag
-        if (this.isEmailVerified) {
+        // If email is verified or verification is not required, clear the dismissed banner flag
+        if (this.isEmailVerified || !isVerificationRequired) {
           localStorage.removeItem('emailVerificationBannerDismissed');
           this.shouldShowVerificationBanner = false;
+          console.log('Banner nascosto: email verificata o verifica non richiesta');
         } else {
-          // Check if banner was dismissed only if email is not verified
+          // Check if banner was dismissed only if email is not verified and verification is required
           const dismissed = localStorage.getItem('emailVerificationBannerDismissed');
           this.shouldShowVerificationBanner = !dismissed;
+          console.log('Banner mostrato:', this.shouldShowVerificationBanner, 'Dismissed:', !!dismissed);
         }
       }
     });
@@ -197,6 +209,11 @@ export class AppComponent implements OnInit {
   navigateToHome(): void {
     console.log('Navigating to home...');
     this.router.navigate(['/home']);
+  }
+
+  navigateToAdminSettings(): void {
+    console.log('Navigating to admin settings...');
+    this.router.navigate(['/admin/settings']);
   }
 
   goToEmailVerification(): void {
