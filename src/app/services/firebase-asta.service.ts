@@ -13,6 +13,7 @@ import { AstaJoinRequest, AstaJoinResponse } from '../models/asta-join.model';
 export class FirebaseAstaService {
   private astaSubject = new BehaviorSubject<Asta | null>(null);
   public asta$ = this.astaSubject.asObservable();
+  private joinInProgress = new Set<string>(); // Track ongoing join operations
 
   constructor(private db: AngularFireDatabase) {
     // Ascolta i cambiamenti in tempo reale dal database
@@ -498,23 +499,54 @@ export class FirebaseAstaService {
 
   // Metodo per unirsi a un'asta
   joinAsta(joinRequest: AstaJoinRequest): Promise<AstaJoinResponse> {
+    const lockKey = `${joinRequest.codiceInvito}-${joinRequest.userId}`;
+    
+    // Controlla se c'è già un'operazione di join in corso per questo utente/asta
+    if (this.joinInProgress.has(lockKey)) {
+      return Promise.resolve({ success: false, message: 'Operazione già in corso, attendere...' });
+    }
+    
+    // Aggiungi il lock
+    this.joinInProgress.add(lockKey);
+    
     return new Promise((resolve, reject) => {
       // Prima ottieni l'asta tramite codice
       this.getAstaByCode(joinRequest.codiceInvito).subscribe(asta => {
         if (!asta) {
+          this.joinInProgress.delete(lockKey); // Rimuovi il lock
           resolve({ success: false, message: 'Codice asta non valido' });
           return;
         }
 
-        if (!asta.canJoin()) {
-          resolve({ success: false, message: 'Asta piena o non più disponibile' });
+        if (!asta.isAttiva) {
+          this.joinInProgress.delete(lockKey); // Rimuovi il lock
+          resolve({ success: false, message: 'Asta non più attiva' });
           return;
         }
 
-        // Ora fai un controllo diretto su Firebase per i nomi dei team
-        // per essere sicuri di avere i dati più aggiornati
+        // Fai un controllo diretto su Firebase per ottenere i dati più aggiornati
         this.db.object(`/aste/${asta.id}/teams`).valueChanges().pipe(take(1)).subscribe(teamsData => {
           const teams = teamsData as any;
+          const currentTeamCount = teams ? Object.keys(teams).length : 0;
+          
+          // Verifica se l'utente è già nell'asta
+          const userAlreadyJoined = teams && Object.keys(teams).some(key => {
+            const team = teams[key];
+            return team.userId === joinRequest.userId || team.userEmail === joinRequest.userEmail;
+          });
+          
+          if (userAlreadyJoined) {
+            this.joinInProgress.delete(lockKey); // Rimuovi il lock
+            resolve({ success: true, message: 'Sei già iscritto a questa asta con successo!', asta: asta });
+            return;
+          }
+          
+          // Controlla se l'asta è piena basandosi sui dati reali di Firebase
+          if (currentTeamCount >= asta.numeroPartecipanti) {
+            this.joinInProgress.delete(lockKey); // Rimuovi il lock
+            resolve({ success: false, message: 'Asta piena o non più disponibile' });
+            return;
+          }
           
           // Verifica se il nome del team è già in uso controllando direttamente Firebase
           const teamExists = teams && Object.keys(teams).some(key => {
@@ -548,20 +580,14 @@ export class FirebaseAstaService {
           };
           
           // Incrementa i partecipanti
-          const currentTeamCount = teams ? Object.keys(teams).length : 0;
           const nuovoConteggio = currentTeamCount + 1;
           updates[`/aste/${asta.id}/partecipantiIscritti`] = nuovoConteggio;
 
-          console.log('Creazione nuovo team:', {
-            nomeTeam: joinRequest.nomeTeam,
-            teamKey: teamKey,
-            nuovoConteggio: nuovoConteggio
-          });
-
           this.db.object('/').update(updates).then(() => {
-            console.log('Team creato con successo');
+            this.joinInProgress.delete(lockKey); // Rimuovi il lock
             resolve({ success: true, message: 'Iscrizione effettuata con successo', asta: asta });
           }).catch(error => {
+            this.joinInProgress.delete(lockKey); // Rimuovi il lock anche in caso di errore
             console.error('Errore durante la creazione del team:', error);
             reject(error);
           });

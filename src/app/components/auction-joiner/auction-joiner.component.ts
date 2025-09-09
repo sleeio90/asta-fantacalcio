@@ -36,7 +36,7 @@ export class AuctionJoinerComponent implements OnInit {
   }
 
   onSubmit(): void {
-    if (this.joinForm.valid && this.user) {
+    if (this.joinForm.valid && this.user && !this.isLoading) {
       this.isLoading = true;
       
       const joinRequest: AstaJoinRequest = {
