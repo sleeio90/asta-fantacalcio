@@ -1,30 +1,25 @@
 <div class="admin-auction-manager">
-  <!-- Header Card -->
-  <mat-card class="header-card" appearance="outlined">
-    <mat-card-content>
-      <div class="header-content">
-        <div class="title-section">
-          <div class="icon-title">
-            <mat-icon class="dashboard-icon">dashboard</mat-icon>
-            <div class="title-text">
-              <h1 class="main-title">Le Mie Aste</h1>
-              <p class="subtitle">Gestisci e monitora le tue aste fantacalcio</p>
-            </div>
+  <!-- Header -->
+  <div class="header-section">
+    <mat-card class="header-card">
+      <mat-card-content>
+        <div class="header-content">
+          <div class="header-text">
+            <h1><mat-icon>manage_accounts</mat-icon> Le tue Aste</h1>
+            <p>Crea e gestisci tutte le aste fantacalcio che hai organizzato</p>
+          </div>
+          <div class="header-buttons">
+            <button mat-raised-button color="accent" (click)="onCreateAuction()">
+              <mat-icon>add_circle</mat-icon> Crea Nuova Asta
+            </button>
+            <button mat-raised-button color="primary" (click)="goBackToDashboard()">
+              <mat-icon>dashboard</mat-icon> Torna alla Dashboard
+            </button>
           </div>
         </div>
-        <div class="action-section">
-          <button mat-raised-button 
-                  color="primary" 
-                  class="create-button"
-                  (click)="onCreateAuction()">
-            <mat-icon>add_circle</mat-icon>
-            <span class="d-none d-sm-inline">Crea Nuova Asta</span>
-            <span class="d-inline d-sm-none">Crea</span>
-          </button>
-        </div>
-      </div>
-    </mat-card-content>
-  </mat-card>
+      </mat-card-content>
+    </mat-card>
+  </div>
 
   <!-- Content -->
   <div *ngIf="myAuctions$ | async as auctions; else loadingTemplate">
@@ -42,7 +37,7 @@
     </mat-card>
 
     <!-- Auctions Grid -->
-    <div class="auctions-grid" *ngIf="auctions.length > 0">
+    <div class="auctions-grid" *ngIf="auctions.length > 0">      
       <mat-card class="auction-card" 
                 *ngFor="let auction of auctions" 
                 [class.clickable]="auction.isAttiva && auction.partecipantiIscritti >= auction.numeroPartecipanti"

@@ -38,8 +38,8 @@
         <button mat-button [matMenuTriggerFor]="desktopUserMenu" class="user-info-button">
           <mat-icon>person</mat-icon>
           {{ user.displayName || user.email }}
-          <span class="user-role" [class.admin-role]="user.role === 'admin'">
-            ({{ user.role === 'admin' ? 'Admin' : 'Giocatore' }})
+          <span class="user-role">
+            (Utente)
           </span>
           <mat-icon class="dropdown-arrow">arrow_drop_down</mat-icon>
         </button>
@@ -72,8 +72,8 @@
             <mat-icon>person</mat-icon>
             <div class="user-details">
               <div class="user-name">{{ user.displayName || user.email }}</div>
-              <div class="user-role-mobile" [class.admin-role]="user.role === 'admin'">
-                {{ user.role === 'admin' ? 'Amministratore' : 'Giocatore' }}
+              <div class="user-role-mobile">
+                Utente
               </div>
             </div>
           </button>

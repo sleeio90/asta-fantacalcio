@@ -73,20 +73,19 @@ export class AuctionTableComponent implements OnInit, OnDestroy {
               return;
             }
 
-            // Controlla se l'utente è admin o partecipa all'asta
-            const isAdmin = user.role === 'admin';
+            // Controlla se l'utente è il creatore dell'asta o partecipa all'asta
+            const isCreator = asta.amministratore === user.uid;
             const isParticipant = asta.teams.some(team => (team as any).userId === user.uid);
             
             console.log('Controllo permessi:', {
               userId: user.uid,
-              userRole: user.role,
-              isAdmin,
+              isCreator,
               isParticipant,
               astaAdmin: asta.amministratore,
               teams: asta.teams.map(t => ({ nome: t.nome, userId: (t as any).userId }))
             });
             
-            if (!isAdmin && !isParticipant) {
+            if (!isCreator && !isParticipant) {
               console.log('Utente non autorizzato per questa asta');
               this.notificationsService.showWarning('Non sei autorizzato ad accedere a questa asta');
               this.router.navigate(['/home']);
@@ -220,6 +219,10 @@ export class AuctionTableComponent implements OnInit, OnDestroy {
     this.router.navigate(['/home']);
   }
 
+  goBackToMyTeams(): void {
+    this.router.navigate(['/my-teams']);
+  }
+
   getNomeRuolo(codiceRuolo: string): string {
     switch (codiceRuolo) {
       case 'P': return 'Portieri';
@@ -298,7 +301,10 @@ export class AuctionTableComponent implements OnInit, OnDestroy {
   
   // Metodi per la gestione dei calciatori in visualizzazione verticale
   canEditPlayer(team: Team): boolean {
-    return this.currentUser?.uid === team.userId || this.currentUser?.role === 'admin';
+    if (!this.currentUser) return false;
+    // Solo il proprietario del team o il creatore dell'asta possono modificare
+    return this.currentUser.uid === team.userId || 
+           (this.asta?.amministratore === this.currentUser.uid);
   }
   
   onEditPlayer(calciatore: Calciatore, team: Team): void {

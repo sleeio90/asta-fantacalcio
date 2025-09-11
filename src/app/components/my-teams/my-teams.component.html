@@ -1,0 +1,165 @@
+<div class="my-teams-container">
+  <!-- Header -->
+  <div class="header-section">
+    <mat-card class="header-card">
+      <mat-card-content>
+        <div class="header-content">
+          <div class="header-text">
+            <h1><mat-icon>groups</mat-icon> Le tue Squadre</h1>
+            <p>Visualizza e gestisci tutte le squadre che hai creato nelle varie aste fantacalcio</p>
+          </div>
+          <div class="header-buttons">
+            <button mat-raised-button color="primary" (click)="goBackToDashboard()">
+              <mat-icon>dashboard</mat-icon> Torna alla Dashboard
+            </button>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <!-- Statistiche Rapide -->
+  <div class="stats-section">
+    <div class="stats-grid">
+      <mat-card class="stat-card">
+        <mat-card-content>
+          <div class="stat-item">
+            <mat-icon class="stat-icon">groups</mat-icon>
+            <div class="stat-info">
+              <span class="stat-number">{{ totalSquadre }}</span>
+              <span class="stat-label">Squadre Totali</span>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="stat-card">
+        <mat-card-content>
+          <div class="stat-item">
+            <mat-icon class="stat-icon active">sports_soccer</mat-icon>
+            <div class="stat-info">
+              <span class="stat-number">{{ squadreAttive }}</span>
+              <span class="stat-label">Aste Attive</span>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="stat-card">
+        <mat-card-content>
+          <div class="stat-item">
+            <mat-icon class="stat-icon completed">emoji_events</mat-icon>
+            <div class="stat-info">
+              <span class="stat-number">{{ squadreComplete }}</span>
+              <span class="stat-label">Aste Completate</span>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>
+
+  <!-- Lista Squadre -->
+  <div class="teams-section">
+    <mat-card class="teams-card">
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>list</mat-icon> Elenco delle tue Squadre
+        </mat-card-title>
+        <mat-card-subtitle>
+          Clicca su una squadra per vedere i dettagli e gestirla
+        </mat-card-subtitle>
+      </mat-card-header>
+
+      <mat-card-content>
+        <!-- Filtri -->
+        <div class="filters-section">
+          <mat-form-field appearance="outline">
+            <mat-label>Filtra per stato asta</mat-label>
+            <mat-select [(value)]="filtroStato" (selectionChange)="applicaFiltro()">
+              <mat-option value="tutte">Tutte le Aste</mat-option>
+              <mat-option value="attive">Solo Aste Attive</mat-option>
+              <mat-option value="completate">Solo Aste Completate</mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Cerca squadra</mat-label>
+            <input matInput [(ngModel)]="filtroNome" (input)="applicaFiltro()" placeholder="Nome squadra o asta...">
+            <mat-icon matSuffix>search</mat-icon>
+          </mat-form-field>
+        </div>
+
+        <!-- Loading -->
+        <div *ngIf="loading" class="loading-section">
+          <mat-spinner diameter="40"></mat-spinner>
+          <p>Caricamento squadre...</p>
+        </div>
+
+        <!-- Messaggio squadre vuote -->
+        <div *ngIf="!loading && squadreFiltrate.length === 0" class="empty-section">
+          <mat-icon class="empty-icon">sports_soccer</mat-icon>
+          <h3>Nessuna squadra trovata</h3>
+          <p *ngIf="filtroStato === 'tutte' && !filtroNome">
+            Non hai ancora creato squadre in nessuna asta. 
+            <br>Torna alla dashboard e partecipa a un'asta per iniziare!
+          </p>
+          <p *ngIf="filtroStato !== 'tutte' || filtroNome">
+            Nessuna squadra corrisponde ai filtri selezionati.
+          </p>
+          <button mat-raised-button color="primary" (click)="goBackToDashboard()">
+            Torna alla Dashboard
+          </button>
+        </div>
+
+        <!-- Lista Squadre -->
+        <div *ngIf="!loading && squadreFiltrate.length > 0" class="teams-list">
+          <div class="team-item" 
+               *ngFor="let item of squadreFiltrate" 
+               (click)="vaiAllAsta(item.asta); $event.stopPropagation()"
+               [class.active-auction]="item.asta.isAttiva"
+               style="cursor: pointer;">
+            
+            <div class="team-header">
+              <div class="team-info">
+                <h3 class="team-name">
+                  <mat-icon>group</mat-icon>
+                  {{ item.team.nome }}
+                </h3>
+                <p class="auction-name">
+                  Asta: {{ item.asta.nome }}
+                </p>
+              </div>
+              
+              <div class="team-status">
+                <mat-chip-set>
+                  <mat-chip [class]="item.asta.isAttiva ? 'active-chip' : 'completed-chip'">
+                    <mat-icon>{{ item.asta.isAttiva ? 'radio_button_checked' : 'check_circle' }}</mat-icon>
+                    {{ item.asta.isAttiva ? 'In Corso' : 'Completata' }}
+                  </mat-chip>
+                </mat-chip-set>
+              </div>
+            </div>
+
+            <div class="team-details">
+              <div class="detail-item">
+                <mat-icon>people</mat-icon>
+                <span>{{ getNumeroCalciatori(item.team) }} calciatori</span>
+              </div>
+              
+              <div class="detail-item">
+                <mat-icon>attach_money</mat-icon>
+                <span>Budget: {{ getBudgetRimanente(item.team) }}M / {{ item.asta.budgetMax }}M</span>
+              </div>
+              
+              <div class="detail-item">
+                <mat-icon>calendar_today</mat-icon>
+                <span>Creata: {{ item.asta.dataCreazione | date:'dd/MM/yyyy' }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>

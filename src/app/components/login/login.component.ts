@@ -1,11 +1,12 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { AuthService } from '../../services/auth.service';
+import { AuthService, UserProfile } from '../../services/auth.service';
 import { AppConfigService } from '../../services/app-config.service';
 import { PasswordValidator } from '../../validators/password.validator';
 import { EmailValidator } from '../../validators/email.validator';
+import { filter, take } from 'rxjs/operators';
 
 interface PasswordStrength {
   score: number;
@@ -27,6 +28,9 @@ interface PasswordStrength {
   styleUrls: ['./login.component.scss']
 })
 export class LoginComponent implements OnInit {
+  @Input() isModal = false;
+  @Output() loginSuccess = new EventEmitter<void>();
+  
   isLogin = true;
   loading = false;
   hidePassword = true;
@@ -41,6 +45,7 @@ export class LoginComponent implements OnInit {
     private authService: AuthService,
     private appConfigService: AppConfigService,
     private router: Router,
+    private route: ActivatedRoute,
     private snackBar: MatSnackBar
   ) {
     this.loginForm = this.fb.group({
@@ -52,18 +57,26 @@ export class LoginComponent implements OnInit {
       email: ['', [Validators.required, EmailValidator.strictEmail()]],
       password: ['', [Validators.required, PasswordValidator.strongPassword()]],
       confirmPassword: ['', Validators.required],
-      displayName: ['', Validators.required],
-      role: ['player', Validators.required]
+      displayName: ['', Validators.required]
     }, { validators: this.passwordsMatchValidator });
   }
 
   ngOnInit(): void {
-    // Check if user is already authenticated
-    this.authService.user$.subscribe(user => {
-      if (user) {
-        this.router.navigate(['/home']);
+    // Controlla i query parameters per impostare la modalità
+    this.route.queryParams.subscribe(params => {
+      if (params['mode'] === 'register') {
+        this.isLogin = false;
       }
     });
+
+    // Check if user is already authenticated (solo se non è modale)
+    if (!this.isModal) {
+      this.authService.user$.subscribe(user => {
+        if (user) {
+          this.router.navigate(['/dashboard']);
+        }
+      });
+    }
 
     // Listen to password changes for strength indicator
     this.registerForm.get('password')?.valueChanges.subscribe(password => {
@@ -176,20 +189,30 @@ export class LoginComponent implements OnInit {
 
     try {
       await this.authService.signIn(email, password);
-      this.snackBar.open('Login successful!', 'Close', { duration: 3000 });
       
-      // Controlla se c'è un URL di redirect salvato
-      const redirectUrl = localStorage.getItem('redirectUrl');
-      if (redirectUrl) {
-        localStorage.removeItem('redirectUrl');
-        this.router.navigate([redirectUrl]);
-      } else {
-        // Redirect normale basato sul ruolo - tutti i giocatori vanno alla home
-        this.authService.user$.subscribe(user => {
-          if (user) {
-            this.router.navigate(['/home']);
+      // Aspetta che l'utente sia effettivamente autenticato
+      const user = await this.authService.user$.pipe(
+        filter((user: UserProfile | null) => user !== null),
+        take(1)
+      ).toPromise();
+
+      if (user) {
+        this.snackBar.open('Login successful!', 'Close', { duration: 3000 });
+        
+        if (this.isModal) {
+          // Se è una modale, emetti l'evento
+          this.loginSuccess.emit();
+        } else {
+          // Controlla se c'è un URL di redirect salvato
+          const redirectUrl = localStorage.getItem('redirectUrl');
+          if (redirectUrl) {
+            localStorage.removeItem('redirectUrl');
+            this.router.navigate([redirectUrl]);
+          } else {
+            // Redirect alla dashboard dopo il login
+            this.router.navigate(['/dashboard']);
           }
-        });
+        }
       }
     } catch (error: any) {
       console.error('Login error:', error);
@@ -206,7 +229,7 @@ export class LoginComponent implements OnInit {
       return;
     }
 
-    const { email, password, confirmPassword, displayName, role } = this.registerForm.value;
+    const { email, password, confirmPassword, displayName } = this.registerForm.value;
 
     // Additional check for password confirmation (redundant with validator but good UX)
     if (password !== confirmPassword) {
@@ -229,17 +252,24 @@ export class LoginComponent implements OnInit {
     this.loading = true;
 
     try {
-      await this.authService.register(email, password, displayName, role);
+      await this.authService.register(email, password, displayName);
       
       // Controlla se la verifica email è richiesta
       if (this.appConfigService.isEmailVerificationRequired()) {
         this.snackBar.open('Registration successful! Please check your email for verification.', 'Close', { duration: 5000 });
-        // Redirect to email verification page
-        this.router.navigate(['/email-verification']);
+        if (!this.isModal) {
+          // Redirect to email verification page
+          this.router.navigate(['/email-verification']);
+        }
       } else {
         this.snackBar.open('Registration successful! Welcome!', 'Close', { duration: 3000 });
-        // Redirect to home page
-        this.router.navigate(['/home']);
+        if (this.isModal) {
+          // Se è una modale, emetti l'evento
+          this.loginSuccess.emit();
+        } else {
+          // Redirect to dashboard page
+          this.router.navigate(['/dashboard']);
+        }
       }
     } catch (error: any) {
       console.error('Registration error:', error);

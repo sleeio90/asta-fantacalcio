@@ -655,6 +655,16 @@ export class FirebaseAstaService {
     );
   }
 
+  // Metodo per ottenere SOLO le aste create dall'utente (come amministratore)
+  getMyCreatedAste(userId: string): Observable<Asta[]> {
+    return this.db.list('/aste').valueChanges().pipe(
+      map((aste: any[]) => {
+        return aste.map(astaData => this.reconstructAstaFromFirebase(astaData))
+                   .filter(asta => asta.amministratore === userId);
+      })
+    );
+  }
+
   // Metodo per aggiornare un'asta
   updateAsta(asta: Asta): Promise<void> {
     if (!asta.id) {

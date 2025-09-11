@@ -5,6 +5,12 @@
   min-height: 100vh;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   padding: 20px;
+  
+  &.modal-version {
+    min-height: auto;
+    background: transparent;
+    padding: 0;
+  }
 }
 
 .login-card {
@@ -15,6 +21,14 @@
   border-radius: 16px;
   backdrop-filter: blur(4px);
   border: 1px solid rgba(255, 255, 255, 0.18);
+  
+  &.modal-card {
+    max-width: none;
+    box-shadow: none;
+    border: none;
+    border-radius: 0;
+    backdrop-filter: none;
+  }
 }
 
 .login-card mat-card-header {
@@ -36,6 +50,58 @@
 .full-width {
   width: 100%;
   margin-bottom: 16px;
+}
+
+// Form fields compatti per modale
+.mat-form-field.compact {
+  margin-bottom: 12px;
+  
+  .mat-form-field-wrapper {
+    padding-bottom: 0.5rem;
+  }
+}
+
+// Pulsanti per modale
+.modal-buttons {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+  
+  button {
+    min-width: 120px;
+  }
+}
+
+.modal-toggle {
+  text-align: center;
+  margin-top: 1rem;
+  color: #666;
+  font-size: 0.9rem;
+  
+  p {
+    margin: 0;
+  }
+  
+  button {
+    font-weight: 500;
+  }
+}
+
+.page-toggle {
+  text-align: center;
+  margin-top: 1.5rem;
+  color: #666;
+  font-size: 1rem;
+  
+  p {
+    margin: 0;
+  }
+  
+  button {
+    font-weight: 500;
+    margin-left: 0.5rem;
+  }
 }
 
 /* Password Strength Container - Outside form field */

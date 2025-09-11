@@ -6,6 +6,7 @@ export class Asta {
   nome: string;
   numeroPartecipanti: number;
   creditiPerPartecipante: number;
+  budgetMax: number; // Aggiunto
   codiceInvito: string;
   teams: Team[] = [];
   calciatori: Calciatore[] = [];
@@ -15,6 +16,7 @@ export class Asta {
   partecipantiIscritti: number = 0;
   isAttiva: boolean = true;
   createdAt: Date;
+  dataCreazione: Date; // Aggiunto per compatibilità
 
   constructor(
     nome: string, 
@@ -27,6 +29,7 @@ export class Asta {
     this.nome = nome;
     this.numeroPartecipanti = numeroPartecipanti;
     this.creditiPerPartecipante = creditiPerPartecipante;
+    this.budgetMax = creditiPerPartecipante; // Il budget max è lo stesso dei crediti per partecipante
     this.amministratore = amministratore;
     this.teams = teams;
     this.calciatori = calciatori;
@@ -34,6 +37,7 @@ export class Asta {
     this.calciatoriAssegnati = [];
     this.codiceInvito = this.generaCodiceInvito();
     this.createdAt = new Date();
+    this.dataCreazione = new Date(); // Compatibilità
     // L'amministratore conta come primo partecipante
     this.partecipantiIscritti = teams.length > 0 ? teams.length : 1;
   }

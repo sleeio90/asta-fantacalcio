@@ -1,0 +1,103 @@
+<div class="dashboard-container" *ngIf="user$ | async as user">
+  <!-- Header della Dashboard -->
+  <div class="dashboard-header">
+    <mat-card class="welcome-card">
+      <mat-card-content>
+        <div class="welcome-content">
+          <mat-icon class="user-icon">person</mat-icon>
+          <div class="welcome-text">
+            <h1>Benvenuto, {{user.displayName}}!</h1>
+            <p>Gestisci le tue aste fantacalcio da un unico posto. Cosa vuoi fare oggi?</p>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <!-- Pulsanti Principali -->
+  <div class="main-actions">
+    <div class="action-cards">
+      <!-- Pulsante 1: Crea Asta -->
+      <mat-card class="action-card create-card" (click)="goToCreateAuctions()">
+        <mat-card-content>
+          <div class="action-icon">
+            <mat-icon>add_circle</mat-icon>
+          </div>
+          <h2>Crea Asta</h2>
+          <p>Crea e gestisci le tue aste fantacalcio. Organizza competizioni con i tuoi amici.</p>
+          <div class="action-details">
+            <span>• Crea nuove aste</span>
+            <span>• Gestisci partecipanti</span>
+            <span>• Monitora l'andamento</span>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Pulsante 2: Partecipa -->
+      <mat-card class="action-card participate-card" (click)="goToParticipate()">
+        <mat-card-content>
+          <div class="action-icon">
+            <mat-icon>sports_soccer</mat-icon>
+          </div>
+          <h2>Partecipa</h2>
+          <p>Unisciti alle aste create da altri. Costruisci la tua squadra dei sogni.</p>
+          <div class="action-details">
+            <span>• Cerca aste disponibili</span>
+            <span>• Partecipa alle aste</span>
+            <span>• Gestisci iscrizioni</span>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Pulsante 3: Gestisci Squadre -->
+      <mat-card class="action-card teams-card" (click)="goToManageTeams()">
+        <mat-card-content>
+          <div class="action-icon">
+            <mat-icon>groups</mat-icon>
+          </div>
+          <h2>Gestisci le tue Squadre</h2>
+          <p>Visualizza e gestisci tutte le squadre che hai creato nelle varie aste.</p>
+          <div class="action-details">
+            <span>• Visualizza squadre</span>
+            <span>• Stato iscrizioni</span>
+            <span>• Statistiche</span>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>
+
+  <!-- Sezione Statistiche Rapide -->
+  <div class="stats-section">
+    <mat-card class="stats-card">
+      <mat-card-header>
+        <mat-card-title>Riepilogo Rapido</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="stats-grid">
+          <div class="stat-item">
+            <mat-icon>create</mat-icon>
+            <div class="stat-text">
+              <span class="stat-number">{{ userStats.asteCreate || 0 }}</span>
+              <span class="stat-label">Aste Create</span>
+            </div>
+          </div>
+          <div class="stat-item">
+            <mat-icon>sports_soccer</mat-icon>
+            <div class="stat-text">
+              <span class="stat-number">{{ userStats.astePartecipazioni || 0 }}</span>
+              <span class="stat-label">Partecipazioni</span>
+            </div>
+          </div>
+          <div class="stat-item">
+            <mat-icon>groups</mat-icon>
+            <div class="stat-text">
+              <span class="stat-number">{{ userStats.squadreCreate || 0 }}</span>
+              <span class="stat-label">Squadre Create</span>
+            </div>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>

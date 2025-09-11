@@ -299,8 +299,8 @@ export class TeamDetailComponent implements OnInit, OnChanges, OnDestroy {
       return false;
     }
 
-    // L'admin può gestire tutti i team
-    if (currentUser.role === 'admin') {
+    // Il creatore dell'asta può gestire tutti i team
+    if (this.asta?.amministratore === currentUser.uid) {
       return true;
     }
 

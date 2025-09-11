@@ -1,5 +1,6 @@
 import { Component, OnInit, Output, EventEmitter } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
+import { ActivatedRoute, Router } from '@angular/router';
 import { AstaService } from '../../services/asta.service';
 import { CalciatoriService } from '../../services/calciatori.service';
 import { FirebaseAstaService } from '../../services/firebase-asta.service';
@@ -27,7 +28,9 @@ export class AdminAuctionManagerComponent implements OnInit {
     private firebaseAstaService: FirebaseAstaService,
     private authService: AuthService,
     private notificationsService: NotificationsService,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private route: ActivatedRoute,
+    private router: Router
   ) { }
 
   ngOnInit(): void {
@@ -35,13 +38,20 @@ export class AdminAuctionManagerComponent implements OnInit {
       this.user = user;
       if (user) {
         this.loadMyAuctions();
+        
+        // Controlla se c'è un astaId nei query params per selezionare automaticamente un'asta
+        this.route.queryParams.subscribe(params => {
+          if (params['astaId']) {
+            this.selectAuctionById(params['astaId']);
+          }
+        });
       }
     });
   }
 
   loadMyAuctions(): void {
     if (this.user) {
-      this.myAuctions$ = this.astaService.getMyAste(this.user.uid);
+      this.myAuctions$ = this.astaService.getMyCreatedAste(this.user.uid);
     }
   }
 
@@ -103,7 +113,31 @@ export class AdminAuctionManagerComponent implements OnInit {
     return 'primary';
   }
 
+  private selectAuctionById(astaId: string): void {
+    if (this.myAuctions$) {
+      this.myAuctions$.subscribe(auctions => {
+        const selectedAuction = auctions.find(auction => auction.id === astaId);
+        if (selectedAuction) {
+          // Seleziona automaticamente l'asta
+          this.onAuctionClick(selectedAuction);
+          // Rimuove il parametro dall'URL per pulizia
+          this.router.navigate([], {
+            relativeTo: this.route,
+            queryParams: {},
+            replaceUrl: true
+          });
+        } else {
+          this.notificationsService.showError('Asta non trovata o non hai i permessi per gestirla');
+        }
+      });
+    }
+  }
+
   onAuctionClick(auction: Asta): void {
+    console.log('onAuctionClick chiamato con asta:', auction);
+    console.log('Asta attiva:', auction.isAttiva);
+    console.log('Partecipanti:', auction.partecipantiIscritti, '/', auction.numeroPartecipanti);
+    
     // Verifica che l'asta sia attiva
     if (!auction.isAttiva) {
       this.notificationsService.showError('L\'asta deve essere attiva per poter accedere alla gestione');
@@ -119,7 +153,15 @@ export class AdminAuctionManagerComponent implements OnInit {
       return;
     }
 
-    // Se tutte le condizioni sono soddisfatte, procedi con la gestione
+    // Se tutte le condizioni sono soddisfatte, naviga alla gestione dell'asta
+    console.log('Navigating to auction management for auction:', auction.id);
+    this.router.navigate(['/admin/auction', auction.id]).then(success => {
+      console.log('Navigation success:', success);
+    }).catch(error => {
+      console.error('Navigation error:', error);
+    });
+    
+    // Manteniamo anche l'emit per compatibilità
     this.auctionSelected.emit(auction);
   }
 
@@ -137,5 +179,9 @@ export class AdminAuctionManagerComponent implements OnInit {
       console.error('Errore download CSV:', error);
       this.notificationsService.showError('Errore durante il download del CSV: ' + (error as any).message);
     }
+  }
+
+  goBackToDashboard(): void {
+    this.router.navigate(['/dashboard']);
   }
 }

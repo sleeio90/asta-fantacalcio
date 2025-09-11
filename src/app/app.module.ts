@@ -27,6 +27,7 @@ import { PlayerActionDialogComponent } from './components/player-action-dialog/p
 import { AdminSettingsComponent } from './components/admin-settings/admin-settings.component';
 import { AdminPanelLoginComponent } from './components/admin-panel-login/admin-panel-login.component';
 import { AdminPanelDashboardComponent } from './components/admin-panel-dashboard/admin-panel-dashboard.component';
+import { DashboardComponent } from './components/dashboard/dashboard.component';
 
 // Material Modules
 import { MatButtonModule } from '@angular/material/button';
@@ -53,6 +54,7 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { ClipboardModule } from '@angular/cdk/clipboard';
+import { MyTeamsComponent } from './components/my-teams/my-teams.component';
 
 @NgModule({
   declarations: [
@@ -72,7 +74,9 @@ import { ClipboardModule } from '@angular/cdk/clipboard';
     PlayerActionDialogComponent,
     AdminSettingsComponent,
     AdminPanelLoginComponent,
-    AdminPanelDashboardComponent
+    AdminPanelDashboardComponent,
+    DashboardComponent,
+    MyTeamsComponent
   ],
   imports: [
     BrowserModule,

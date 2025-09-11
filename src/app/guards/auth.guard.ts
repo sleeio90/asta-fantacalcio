@@ -32,14 +32,6 @@ export class AuthGuard implements CanActivate {
           return false;
         }
 
-        // Check if route requires admin role
-        const requiredRole = route.data['role'] as string;
-        if (requiredRole && requiredRole === 'admin' && user.role !== 'admin') {
-          // User is not admin, redirect to home
-          this.router.navigate(['/home']);
-          return false;
-        }
-
         return true;
       })
     );
@@ -56,6 +48,7 @@ export class AdminGuard implements CanActivate {
   ) {}
 
   canActivate(): Observable<boolean> {
+    // Ora AdminGuard è equivalente ad AuthGuard dato che non ci sono più ruoli
     return combineLatest([
       this.authService.user$,
       this.authService.authLoading$
@@ -65,11 +58,6 @@ export class AdminGuard implements CanActivate {
       map(([user, loading]) => {
         if (!user) {
           this.router.navigate(['/login']);
-          return false;
-        }
-
-        if (user.role !== 'admin') {
-          this.router.navigate(['/home']);
           return false;
         }
 
@@ -105,8 +93,8 @@ export class LoginGuard implements CanActivate {
             return false;
           }
 
-          // User is already logged in, redirect to home for everyone
-          this.router.navigate(['/home']);
+          // User is already logged in, redirect to dashboard for authenticated users
+          this.router.navigate(['/dashboard']);
           return false;
         }
         return true;

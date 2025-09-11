@@ -61,6 +61,10 @@ export class AstaService {
     return this.firebaseService.getMyAste(userId);
   }
 
+  getMyCreatedAste(userId: string): Observable<Asta[]> {
+    return this.firebaseService.getMyCreatedAste(userId);
+  }
+
   updateAsta(asta: Asta): Observable<void> {
     return new Observable(observer => {
       this.firebaseService.updateAsta(asta).then(() => {

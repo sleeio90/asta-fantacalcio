@@ -2,9 +2,13 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { HomeComponent } from './components/home/home.component';
 import { LoginComponent } from './components/login/login.component';
+import { DashboardComponent } from './components/dashboard/dashboard.component';
 import { AuctionTableComponent } from './components/auction-table/auction-table.component';
+import { AuctionJoinerComponent } from './components/auction-joiner/auction-joiner.component';
+import { AdminAuctionManagerComponent } from './components/admin-auction-manager/admin-auction-manager.component';
 import { TeamDetailComponent } from './components/team-detail/team-detail.component';
 import { TeamManagerComponent } from './components/team-manager/team-manager.component';
+import { MyTeamsComponent } from './components/my-teams/my-teams.component';
 import { EmailVerificationComponent } from './components/email-verification/email-verification.component';
 import { AdminSettingsComponent } from './components/admin-settings/admin-settings.component';
 import { AdminPanelLoginComponent } from './components/admin-panel-login/admin-panel-login.component';
@@ -25,8 +29,26 @@ const routes: Routes = [
     canActivate: [AuthGuard]
   },
   { 
-    path: 'home', 
-    component: HomeComponent,
+    path: 'dashboard', 
+    component: DashboardComponent,
+    canActivate: [AuthGuard, EmailVerificationGuard]
+  },
+  // Pulsante 1: Gestione Aste Create
+  { 
+    path: 'admin/auctions', 
+    component: AdminAuctionManagerComponent,
+    canActivate: [AuthGuard, EmailVerificationGuard]
+  },
+  // Pulsante 2: Partecipazione alle Aste
+  { 
+    path: 'player/auctions', 
+    component: AuctionJoinerComponent,
+    canActivate: [AuthGuard, EmailVerificationGuard]
+  },
+  // Pulsante 3: Gestione Squadre
+  { 
+    path: 'my-teams', 
+    component: MyTeamsComponent,
     canActivate: [AuthGuard, EmailVerificationGuard]
   },
   { 
@@ -47,8 +69,7 @@ const routes: Routes = [
   { 
     path: 'admin/settings', 
     component: AdminSettingsComponent,
-    canActivate: [AdminGuard],
-    data: { role: 'admin' }
+    canActivate: [AuthGuard]
   },
   { 
     path: 'riepilogo', 
@@ -81,7 +102,12 @@ const routes: Routes = [
   },
   { 
     path: '', 
-    redirectTo: '/home', 
+    component: HomeComponent, 
+    pathMatch: 'full' 
+  },
+  { 
+    path: 'home', 
+    redirectTo: '', 
     pathMatch: 'full' 
   },
   { 

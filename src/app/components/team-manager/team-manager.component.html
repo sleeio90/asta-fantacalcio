@@ -1,10 +1,21 @@
 <div class="container" *ngIf="asta">
-  <!-- Header con pulsante di ritorno -->
+  <!-- Header -->
   <div class="header-section">
-    <button mat-raised-button color="primary" (click)="goBack()" class="back-button">
-      <mat-icon>arrow_back</mat-icon>
-      Torna alle Aste
-    </button>
+    <mat-card class="header-card">
+      <mat-card-content>
+        <div class="header-content">
+          <div class="header-text">
+            <h1><mat-icon>settings</mat-icon> Gestione Asta</h1>
+            <p>Assegna i calciatori ai team e gestisci tutti i dettagli dell'asta "{{ asta.nome }}"</p>
+          </div>
+          <div class="header-buttons">
+            <button mat-raised-button color="primary" (click)="goBack()">
+              <mat-icon>arrow_back</mat-icon> Torna alle Aste
+            </button>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
   </div>
 
   <mat-card>

@@ -63,7 +63,7 @@ export class AppComponent implements OnInit {
     console.log('Logout button clicked');
     try {
       await this.authService.signOut();
-      this.router.navigate(['/login']);
+      this.router.navigate(['/']);
     } catch (error) {
       console.error('Logout error:', error);
     }
@@ -87,38 +87,22 @@ export class AppComponent implements OnInit {
       console.log('Aste dell utente:', userAuctions);
       
       if (userAuctions && userAuctions.length > 0) {
-        if (currentUser.role === 'admin') {
-          // Per gli admin: warning che elimineranno anche le aste
-          const asteList = userAuctions.map(asta => '• ' + asta.nome + ' (' + asta.teams.length + ' partecipanti)' + (asta.isAttiva ? ' [ATTIVA]' : ' [NON ATTIVA]')).join('\n');
-          const confirmMessage = 
-            '⚠️ ATTENZIONE: Aste Rilevate!\n\n' +
-            'Hai ' + userAuctions.length + ' asta/e:\n\n' +
-            asteList +
-            '\n\n❗ Se elimini l\'account, eliminerai anche tutte le aste!\n' +
-            '   Tutti i dati delle aste, team e calciatori verranno persi definitivamente!\n\n' +
-            'Vuoi continuare comunque?';
+        // Per gli utenti: warning che elimineranno anche le aste che hanno creato
+        const asteList = userAuctions.map(asta => '• ' + asta.nome + ' (' + asta.teams.length + ' partecipanti)' + (asta.isAttiva ? ' [ATTIVA]' : ' [NON ATTIVA]')).join('\n');
+        const confirmMessage = 
+          '⚠️ ATTENZIONE: Aste Rilevate!\n\n' +
+          'Hai ' + userAuctions.length + ' asta/e create:\n\n' +
+          asteList +
+          '\n\n❗ Se elimini l\'account, eliminerai anche tutte le aste!\n' +
+          '   Tutti i dati delle aste, team e calciatori verranno persi definitivamente!\n\n' +
+          'Vuoi continuare comunque?';
           
-          console.log('Mostro conferma per aste admin');
-          const confirmed = confirm(confirmMessage);
-          console.log('Conferma ricevuta:', confirmed);
-          
-          if (!confirmed) {
-            console.log('Eliminazione annullata dall utente');
-            return;
-          }
-        } else {
-          // Per i player: non possono eliminare l'account se sono in qualsiasi asta
-          console.log('Player con aste - blocco eliminazione');
-          const asteList = userAuctions.map(asta => '• ' + asta.nome + (asta.isAttiva ? ' [ATTIVA]' : ' [NON ATTIVA]')).join('\n');
-          alert(
-            '❌ Non puoi eliminare l\'account!\n\n' +
-            'Sei iscritto a ' + userAuctions.length + ' asta/e:\n\n' +
-            asteList +
-            '\n\n🔧 Per eliminare l\'account devi:\n' +
-            '1. Contattare l\'amministratore di ogni asta\n' +
-            '2. Farti rimuovere da tutte le aste\n' +
-            '3. Poi potrai eliminare l\'account'
-          );
+        console.log('Mostro conferma per aste admin');
+        const confirmed = confirm(confirmMessage);
+        console.log('Conferma ricevuta:', confirmed);
+        
+        if (!confirmed) {
+          console.log('Eliminazione annullata dall utente');
           return;
         }
       }
@@ -130,50 +114,50 @@ export class AppComponent implements OnInit {
       
       if (finalConfirmed) {
         try {
-          // Se è admin, elimina tutte le sue aste prima di eliminare l'account
-          if (currentUser.role === 'admin' && userAuctions) {
-            const adminAuctions = userAuctions.filter(asta => asta.amministratore === currentUser.uid);
+          // Elimina tutte le aste create dall'utente prima di eliminare l'account
+          if (userAuctions) {
+            const userCreatedAuctions = userAuctions.filter((asta: any) => asta.amministratore === currentUser.uid);
             
-            console.log('Eliminando ' + adminAuctions.length + ' aste dell admin...');
+            console.log('Eliminando ' + userCreatedAuctions.length + ' aste create dall\'utente...');
             
             // Elimina ogni asta in sequenza
-            for (const asta of adminAuctions) {
+            for (const asta of userCreatedAuctions) {
               if (asta.id) {
                 console.log('Eliminando asta: ' + asta.nome + ' (ID: ' + asta.id + ')');
                 try {
                   await this.astaService.deleteAsta(asta.id).pipe(take(1)).toPromise();
                   console.log('Asta eliminata con successo:', asta.id);
-                } catch (error) {
+                } catch (error: any) {
                   console.error('Errore eliminazione asta:', asta.id, error);
                   throw error;
                 }
               }
             }
             
-            console.log('Tutte le aste dell admin sono state eliminate');
+            console.log('Tutte le aste create dall\'utente sono state eliminate');
           }
 
           console.log('Procedo con eliminazione account Firebase...');
           // Ora elimina l'account utente
           await this.authService.deleteAccount();
           console.log('Account eliminato con successo');
-          this.router.navigate(['/login']);
-        } catch (error) {
+          this.router.navigate(['/']);
+        } catch (error: any) {
           console.error('Errore durante l eliminazione dell account:', error);
           
           // Se richiede riautenticazione, informa l'utente
-          if ((error as any).message === 'REAUTH_REQUIRED') {
+          if (error.message === 'REAUTH_REQUIRED') {
             alert('Per motivi di sicurezza, devi effettuare nuovamente il login prima di eliminare l\'account.\n\nFai logout e accedi di nuovo, poi riprova l\'eliminazione.');
           } else {
-            alert('Errore durante l eliminazione dell account: ' + (error as any).message);
+            alert('Errore durante l eliminazione dell account: ' + error.message);
           }
         }
       } else {
         console.log('Eliminazione account annullata nella conferma finale');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Errore nel controllo delle aste:', error);
-      alert('Errore nel controllo delle aste: ' + (error as any).message);
+      alert('Errore nel controllo delle aste: ' + error.message);
     }
   }
 
@@ -208,7 +192,14 @@ export class AppComponent implements OnInit {
 
   navigateToHome(): void {
     console.log('Navigating to home...');
-    this.router.navigate(['/home']);
+    // Se l'utente è autenticato, vai alla dashboard, altrimenti alla home pubblica
+    this.user$.pipe(take(1)).subscribe(user => {
+      if (user) {
+        this.router.navigate(['/dashboard']);
+      } else {
+        this.router.navigate(['/']);
+      }
+    });
   }
 
   navigateToAdminSettings(): void {

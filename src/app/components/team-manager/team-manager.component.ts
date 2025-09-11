@@ -333,7 +333,7 @@ export class TeamManagerComponent implements OnInit, OnDestroy {
   }
 
   goBack(): void {
-    this.router.navigate(['/home']);
+    this.router.navigate(['/admin/auctions']);
   }
 
   ngOnDestroy(): void {

@@ -12,7 +12,6 @@ export interface UserProfile {
   uid: string;
   email: string;
   displayName?: string;
-  role: 'admin' | 'player' | 'superadmin';
   createdAt: Date;
   emailVerified?: boolean;
 }
@@ -51,7 +50,7 @@ export class AuthService {
   }
 
   // Register new user
-  async register(email: string, password: string, displayName: string, role: 'admin' | 'player' | 'superadmin' = 'player'): Promise<UserProfile> {
+  async register(email: string, password: string, displayName: string): Promise<UserProfile> {
     try {
       const credential = await this.afAuth.createUserWithEmailAndPassword(email, password);
       if (!credential.user) {
@@ -60,12 +59,6 @@ export class AuthService {
 
       // Update the user's display name
       await credential.user.updateProfile({ displayName });
-
-      // Determina il ruolo finale: se l'email corrisponde al super-admin, assegna superadmin
-      let finalRole = role;
-      if (email.toLowerCase() === environment.superAdmin.email.toLowerCase()) {
-        finalRole = 'superadmin';
-      }
 
       // Send email verification only if required by configuration
       if (this.appConfigService.isEmailVerificationRequired()) {
@@ -82,7 +75,6 @@ export class AuthService {
         uid: credential.user.uid,
         email: email,
         displayName: displayName,
-        role: finalRole,
         createdAt: new Date(),
         emailVerified: credential.user.emailVerified
       };
@@ -156,49 +148,13 @@ export class AuthService {
     return this.userSubject.value;
   }
 
-  // Check if user is admin
-  isAdmin(): boolean {
-    const user = this.getCurrentUser();
-    return user?.role === 'admin' || user?.role === 'superadmin' || false;
-  }
-
-  // Check if user is super admin
-  isSuperAdmin(): boolean {
-    const user = this.getCurrentUser();
-    return user?.role === 'superadmin' || false;
-  }
-
   // Check if user is authenticated
   isAuthenticated(): boolean {
     return this.getCurrentUser() !== null;
   }
 
-  // Get user role
-  getUserRole(): 'admin' | 'player' | 'superadmin' | null {
-    const user = this.getCurrentUser();
-    return user?.role || null;
-  }
-
-  // Update user role (super-admin only)
-  async updateUserRole(uid: string, newRole: 'admin' | 'player' | 'superadmin'): Promise<void> {
-    if (!this.isSuperAdmin()) {
-      throw new Error('Solo il super-admin può aggiornare i ruoli utente');
-    }
-
-    try {
-      await this.db.object(`users/${uid}`).update({ role: newRole });
-    } catch (error) {
-      console.error('Error updating user role:', error);
-      throw error;
-    }
-  }
-
-  // Get all users (admin only)
+  // Get all users
   getAllUsers(): Observable<UserProfile[]> {
-    if (!this.isAdmin()) {
-      return of([]);
-    }
-
     return this.db.list<UserProfile>('users').valueChanges();
   }
 

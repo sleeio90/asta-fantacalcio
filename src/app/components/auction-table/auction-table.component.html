@@ -1,9 +1,9 @@
 <div class="container" *ngIf="asta">
   <!-- Header con pulsante di ritorno -->
   <div class="header-section">
-    <button mat-raised-button color="primary" (click)="goBack()" class="back-button">
+    <button mat-raised-button color="primary" (click)="goBackToMyTeams()" class="back-button">
       <mat-icon>arrow_back</mat-icon>
-      Torna alla Home
+      Indietro
     </button>
     
     <!-- Toggle per visualizzazione -->
@@ -311,10 +311,10 @@
       <mat-card-subtitle>Non è stata creata nessuna asta</mat-card-subtitle>
     </mat-card-header>
     <mat-card-content>
-      <p>Torna alla home per creare una nuova asta.</p>
+      <p>Torna alla dashboard per creare una nuova asta.</p>
     </mat-card-content>
     <mat-card-actions>
-      <button mat-raised-button color="primary" [routerLink]="['/']">Torna alla Home</button>
+      <button mat-raised-button color="primary" [routerLink]="['/dashboard']">Torna alla Dashboard</button>
     </mat-card-actions>
   </mat-card>
 </div>

@@ -1,82 +1,98 @@
-<div class="container" *ngIf="user$ | async as user">
-  <!-- Admin Welcome Message -->
-  <mat-card class="admin-welcome" *ngIf="user.role === 'admin'">
-    <mat-card-content>
-      <div class="welcome-content">
-        <mat-icon class="admin-icon">admin_panel_settings</mat-icon>
-        <div>
-          <h2>Benvenuto, {{ user.displayName || user.email }}!</h2>
-          <p>Sei connesso come <strong>Amministratore</strong>. Hai accesso completo alla gestione dei calciatori e delle aste.</p>
-        </div>
-      </div>
-    </mat-card-content>
-  </mat-card>
-
-  <!-- Player Welcome Message -->
-  <mat-card class="player-welcome" *ngIf="user.role === 'player'">
-    <mat-card-content>
-      <div class="welcome-content">
-        <mat-icon class="player-icon">person</mat-icon>
-        <div>
-          <h2>Benvenuto, {{ user.displayName || user.email }}!</h2>
-          <p>Sei connesso come <strong>Giocatore</strong>. Puoi unirti alle aste utilizzando il codice invito fornito dall'amministratore.</p>
-        </div>
-      </div>
-    </mat-card-content>
-  </mat-card>
-
-  <!-- SEZIONE AMMINISTRATORE -->
-  <div *ngIf="user.role === 'admin'">
-    <mat-card>
-      <mat-card-header>
-        <mat-card-title>Gestione Asta Fantacalcio - Pannello Amministratore</mat-card-title>
-        <mat-card-subtitle>Crea e gestisci le tue aste fantacalcio</mat-card-subtitle>
-      </mat-card-header>
-      
-      <mat-card-content>
-        <div class="row mb-4">
-          <div class="col-12">
-            <h3>Istruzioni per Amministratori</h3>
-            <p class="instructions-text">
-              Come amministratore, hai il controllo completo sulla gestione delle aste fantacalcio.
-              I giocatori potranno iscriversi alle tue aste utilizzando i codici invito che genererai.
-            </p>
-            <ol class="instructions-list">
-              <li>Crea una nuova asta specificando nome, numero di partecipanti e crediti per partecipante</li>
-              <li>Condividi il codice invito generato automaticamente con i giocatori</li>
-              <li>Gestisci le tue aste: attiva/disattiva o elimina</li>
-              <li>Avvia l'assegnazione dei calciatori quando tutti i partecipanti si sono iscritti</li>
-            </ol>
-          </div>
-        </div>
-
-        <app-admin-auction-manager (auctionSelected)="onAuctionSelected($event)"></app-admin-auction-manager>
-      </mat-card-content>
-    </mat-card>
+<!-- Header/Navbar -->
+<header class="navbar">
+  <div class="navbar-container">
+    <div class="navbar-brand">
+      <mat-icon class="brand-icon">sports_soccer</mat-icon>
+      <span class="brand-text">Asta Fantacalcio</span>
+    </div>
+    <div class="navbar-actions">
+      <button mat-stroked-button color="primary" (click)="openLoginModal()">
+        <mat-icon>account_circle</mat-icon>
+        Accedi
+      </button>
+    </div>
   </div>
+</header>
 
-  <!-- SEZIONE GIOCATORE -->
-  <div *ngIf="user.role === 'player'">
-    <!-- Dettaglio dell'asta del giocatore -->
-    <app-player-auction-detail></app-player-auction-detail>
-
-    <!-- Pannello espandibile per unirsi a un'asta -->
-    <mat-expansion-panel class="join-auction-panel" [expanded]="false">
-      <mat-expansion-panel-header>
-        <mat-panel-title>
-          <div class="expansion-title">
-            <mat-icon>add_circle_outline</mat-icon>
-            <span class="title-text">Unisciti a una Nuova Asta</span>
+<!-- Hero Section - Solo per utenti NON autenticati -->
+<div class="hero-section">
+  <div class="hero-container">
+    <div class="hero-content">
+      <div class="hero-text">
+        <h1 class="hero-title">
+          <mat-icon class="hero-icon">sports_soccer</mat-icon>
+          Asta Fantacalcio
+        </h1>
+        <h2 class="hero-subtitle">La piattaforma definitiva per le tue aste</h2>
+        <p class="hero-description">
+          Organizza e partecipa ad aste fantacalcio in tempo reale con la nostra piattaforma avanzata. 
+          Gestisci squadre, monitora i budget e vivi l'emozione dell'asta insieme ai tuoi amici!
+        </p>
+        
+        <div class="features-grid">
+          <div class="feature-item">
+            <mat-icon>group</mat-icon>
+            <span>Aste Multiplayer</span>
           </div>
-        </mat-panel-title>
-        <mat-panel-description>
-          <span class="description-text">Usa il codice invito per partecipare a un'asta fantacalcio</span>
-        </mat-panel-description>
-      </mat-expansion-panel-header>
-      
-      <div class="expansion-content">
-        <app-auction-joiner (auctionJoined)="onAuctionJoined($event)"></app-auction-joiner>
+          <div class="feature-item">
+            <mat-icon>attach_money</mat-icon>
+            <span>Gestione Budget</span>
+          </div>
+          <div class="feature-item">
+            <mat-icon>timeline</mat-icon>
+            <span>Statistiche Avanzate</span>
+          </div>
+          <div class="feature-item">
+            <mat-icon>mobile_friendly</mat-icon>
+            <span>Mobile Ready</span>
+          </div>
+        </div>
+
+        <div class="cta-section">
+          <button mat-raised-button color="primary" class="cta-button" (click)="goToRegister()">
+            <mat-icon>person_add</mat-icon>
+            Inizia Subito
+          </button>
+          <p class="cta-text">Crea il tuo account gratuitamente e organizza la tua prima asta!</p>
+        </div>
+
+        <!-- Info Section about Fantacalcio -->
+        <div class="info-section">
+          <h3>Come funziona il Fantacalcio?</h3>
+          <div class="info-cards">
+            <div class="info-card">
+              <mat-icon>groups</mat-icon>
+              <h4>Crea la Lega</h4>
+              <p>Invita i tuoi amici e create insieme la vostra lega fantacalcio</p>
+            </div>
+            <div class="info-card">
+              <mat-icon>gavel</mat-icon>
+              <h4>Asta dei Giocatori</h4>
+              <p>Partecipa all'asta per acquistare i calciatori della Serie A</p>
+            </div>
+            <div class="info-card">
+              <mat-icon>emoji_events</mat-icon>
+              <h4>Compete e Vinci</h4>
+              <p>Sfida i tuoi amici ogni giornata di campionato</p>
+            </div>
+          </div>
+        </div>
       </div>
-    </mat-expansion-panel>
+    </div>
+  </div>
+</div>
+
+<!-- Login Modal -->
+<div class="modal-overlay" *ngIf="showLoginModal" (click)="closeLoginModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>Accedi al tuo account</h3>
+      <button mat-icon-button (click)="closeLoginModal()">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+    <div class="modal-body">
+      <app-login [isModal]="true" (loginSuccess)="onLoginSuccess()"></app-login>
+    </div>
   </div>
 </div>
